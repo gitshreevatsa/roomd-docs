@@ -1,6 +1,6 @@
 ---
 title: "Agent loop"
-description: "A turn structure that doesn't thrash the room."
+description: "A practical turn structure for agents in a room."
 ---
 
 At the start of a turn:
@@ -14,14 +14,14 @@ heartbeat
   → wait_for_events (optional)
 ```
 
-| Role | Tools you lean on |
+| Role | Useful tools |
 |---|---|
 | Coordinator | `add_task`, `set_task_priority`, `add_dependency`, `write_context` |
 | Worker | `get_my_tasks`, `update_task`, `acquire_lock`, `post_event` |
 | Reviewer | `request_review`, `approve`, `reject` |
 | Observer | `read_events`, `get_room_info`, `get_room_analytics` |
 
-A few habits that matter:
+Habits that keep rooms coherent:
 
 1. One `agent_id` per process. Don't share unread cursors.
 2. Context for contracts, events for signals. Change requests live in context.

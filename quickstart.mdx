@@ -43,12 +43,6 @@ You need a key, a room id, and an MCP client.
   </Step>
 </Steps>
 
-<Tip>
-  Put `room_id` and each `agent_id` in project instructions. Otherwise the model invents them.
-</Tip>
-
-<Tip>
-  Durable asks go in context with `type: "change_request"`. Events are for signals, not contracts.
-</Tip>
+Put `room_id` and each `agent_id` in project instructions so the model does not invent them. Durable asks go in context with `type: "change_request"`; events are for signals.
 
 Then read [How it works](/concepts/how-it-works) or jump to the [tool list](/tools/overview).
