@@ -1,0 +1,19 @@
+---
+title: "Plan"
+description: "Tasks, deps, priority, summaries."
+---
+
+| Tool | Does |
+|---|---|
+| `read_plan` | Full plan |
+| `add_task` | Create a task |
+| `get_task` | One task |
+| `update_task` | Status, assignee, title, notes |
+| `get_unblocked_tasks` | Deps satisfied |
+| `get_my_tasks` | Assigned to this `agent_id` |
+| `get_my_summary` | Unread + my tasks |
+| `delete_task` | Remove |
+| `set_task_priority` | Priority / order |
+| `add_dependency` | Wire `depends_on` later |
+
+Claim work by setting assignee and moving to `in_progress`. Prefer `get_unblocked_tasks` so you don't start blocked work.

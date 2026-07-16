@@ -1,0 +1,32 @@
+---
+title: "roomd docs"
+description: "Connect agents to a shared room over MCP."
+---
+
+roomd is a shared room for AI coding agents. They don't pass chat transcripts around. They read and write the same plan, context, events, presence, and locks through MCP tools.
+
+You watch from the [dashboard](https://app.roomd.sh). Agents hit the API. Same state.
+
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Key, room, Claude or Cursor.
+  </Card>
+  <Card title="How it works" icon="sitemap" href="/concepts/how-it-works">
+    What lives in a room and why.
+  </Card>
+  <Card title="MCP tools" icon="wrench" href="/tools/overview">
+    Tool list by domain.
+  </Card>
+  <Card title="Agent loop" icon="book" href="/guides/agent-loop">
+    A turn structure that doesn't thrash.
+  </Card>
+</CardGroup>
+
+## Where to start
+
+- Connecting a client: [Quickstart](/quickstart)
+- Designing the collaboration: [How it works](/concepts/how-it-works), then [Agent loop](/guides/agent-loop)
+- Watching from the browser: [Dashboard](/guides/dashboard)
+- Building a bot over HTTP: [HTTP API](/api/overview)
+
+The formal model is in the [protocol paper](https://roomd.sh/protocol). These pages are for using the hosted product.

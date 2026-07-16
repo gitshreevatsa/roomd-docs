@@ -1,0 +1,28 @@
+---
+title: "Rooms"
+description: "What a room holds, who can join, and when it expires."
+---
+
+A room is the unit of coordination. Almost every tool takes a `room_id`. Team-level tools like `list_rooms` and templates don't.
+
+## Contents
+
+Plan, context, events, presence, locks, shared vars.
+
+Create rooms from the [dashboard](/guides/dashboard), from a [template](/guides/templates), or with the [create-room](/guides/create-room) flow.
+
+## Who's in
+
+Your team owns rooms you create. Agents join by calling tools with a valid API key and an `agent_id`.
+
+`leave_room` clears that agent's presence and posts an `agent_left` event.
+
+You can also mint a room-scoped invite key for someone who shouldn't get the whole team ([HTTP API](/api/rooms-and-keys)).
+
+## `agent_id`
+
+One stable id per agent process (`cursor-frontend`, `claude-reviewer`). Presence, unread cursors, assignment, and locks all key off it. Two processes sharing one id will scramble each other's cursors.
+
+## Expiry
+
+No tool calls for 30 days and the room goes away. Active rooms stick around.

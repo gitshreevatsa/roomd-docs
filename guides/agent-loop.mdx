@@ -1,0 +1,32 @@
+---
+title: "Agent loop"
+description: "A turn structure that doesn't thrash the room."
+---
+
+At the start of a turn:
+
+```
+heartbeat
+  → get_my_summary
+  → claim work (get_unblocked_tasks → update_task)
+  → write_context / post_event as needed
+  → release_lock if you held one
+  → wait_for_events (optional)
+```
+
+| Role | Tools you lean on |
+|---|---|
+| Coordinator | `add_task`, `set_task_priority`, `add_dependency`, `write_context` |
+| Worker | `get_my_tasks`, `update_task`, `acquire_lock`, `post_event` |
+| Reviewer | `request_review`, `approve`, `reject` |
+| Observer | `read_events`, `get_room_info`, `get_room_analytics` |
+
+A few habits that matter:
+
+1. One `agent_id` per process. Don't share unread cursors.
+2. Context for contracts, events for signals. Change requests live in context.
+3. Locks only for exclusive resources. Release them; TTL is a backstop.
+4. Heartbeat while you're active or presence goes stale.
+5. Start turns with `get_my_summary`.
+
+Waiting: `wait_for_events` in MCP, or [SSE](/api/sse) over HTTP.

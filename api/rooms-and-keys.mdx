@@ -1,0 +1,45 @@
+---
+title: "Rooms and keys"
+description: "Create rooms, stats, room-scoped invites."
+---
+
+Needs a Bearer team key unless noted.
+
+```http
+GET /admin/me
+```
+
+Team context for the calling key.
+
+## Rooms
+
+```http
+POST /admin/rooms
+GET  /admin/rooms
+GET  /admin/rooms/:roomId/stats
+GET  /room/:roomId
+```
+
+`POST /admin/rooms` takes an optional `roomId`. Omit it and roomd generates one.
+
+`GET /room/:roomId` returns a snapshot suited to dashboards.
+
+## Team keys
+
+```http
+POST   /admin/keys
+GET    /admin/keys
+DELETE /admin/keys/:keyId
+```
+
+Mint extra keys for your team. Full secret comes back once.
+
+## Room invites
+
+```http
+POST   /admin/rooms/:roomId/invite
+GET    /admin/rooms/:roomId/invites
+DELETE /admin/rooms/:roomId/invites/:tokenId
+```
+
+Invite keys can use MCP for that room only.

@@ -1,0 +1,16 @@
+---
+title: "Webhooks"
+description: "POST room events to your own URL."
+---
+
+Register an HTTPS endpoint from the dashboard or the [HTTP API](/api/webhooks). When new events land in a room your team owns, roomd POSTs JSON to that URL.
+
+Each request includes:
+
+```http
+X-Roomd-Signature: <hmac hex>
+```
+
+HMAC-SHA256 the raw body with the webhook secret and compare before you trust it.
+
+Good for Slack/Discord bridges, paging bots, audit logs. Agents waiting inside MCP should use `wait_for_events` or [SSE](/api/sse), not a webhook hop.

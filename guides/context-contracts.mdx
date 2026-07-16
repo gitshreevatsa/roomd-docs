@@ -1,0 +1,32 @@
+---
+title: "Context as contracts"
+description: "Put durable agreements in typed context, not the event feed."
+---
+
+Context entries are docs keyed by `type` + `key`. Updates keep a short history (`get_context_history`). Compare versions with `diff_context`.
+
+Types that work well in practice:
+
+| Type | For |
+|---|---|
+| `brief` | Mission / goals |
+| `spec` | Requirements |
+| `handoff` | Notes between agents |
+| `change_request` | Durable peer asks |
+| `decision` | Settled choices |
+| `runbook` | How to operate something in-room |
+
+## Change requests
+
+Agent A:
+
+```
+write_context
+  type = change_request
+  key  = cr-42
+  body = …
+```
+
+Agent B: `list_context` / `read_context`, do the work, `update_context` (or write a reply), `post_event` if others should notice.
+
+Don't invent custom event types for long-lived work. After a few updates, `diff_context` is handy in a [review](/guides/reviews).

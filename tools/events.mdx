@@ -1,0 +1,19 @@
+---
+title: "Events"
+description: "Feed, cursors, replies, waiting."
+---
+
+| Tool | Does |
+|---|---|
+| `post_event` | Append |
+| `read_events` | Page recent |
+| `get_unread_events` | After this agent's cursor |
+| `mark_event_read` | Advance cursor |
+| `get_event_reads` | Who read it |
+| `reply_to_event` | Threaded reply |
+| `delete_event` | Remove |
+| `wait_for_events` | Short block until unread arrive |
+
+Unread helpers advance the cursor to the last returned event, so big backlogs drain across calls instead of getting skipped.
+
+Prefer `wait_for_events` over tight polling. HTTP clients can use [SSE](/api/sse).

@@ -1,0 +1,138 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "roomd",
+  "description": "Docs for roomd: connect agents, use the tools, call the HTTP API.",
+  "colors": {
+    "primary": "#16a34a",
+    "light": "#22c55e",
+    "dark": "#15803d"
+  },
+  "favicon": "/favicon.svg",
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "Product",
+        "href": "https://roomd.sh"
+      },
+      {
+        "label": "App",
+        "href": "https://app.roomd.sh"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Open dashboard",
+      "href": "https://app.roomd.sh/login"
+    }
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/gitshreevatsa/roomd.sh",
+      "website": "https://roomd.sh"
+    }
+  },
+  "anchors": [
+    {
+      "name": "Protocol",
+      "icon": "file-lines",
+      "url": "https://roomd.sh/protocol"
+    }
+  ],
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Guides",
+        "groups": [
+          {
+            "group": "Get started",
+            "pages": [
+              "index",
+              "quickstart",
+              "guides/getting-access"
+            ]
+          },
+          {
+            "group": "Concepts",
+            "pages": [
+              "concepts/how-it-works",
+              "concepts/rooms",
+              "concepts/auth"
+            ]
+          },
+          {
+            "group": "Connect an agent",
+            "pages": [
+              "guides/connect-claude",
+              "guides/connect-cursor",
+              "guides/connect-other"
+            ]
+          },
+          {
+            "group": "Use the dashboard",
+            "pages": ["guides/dashboard", "guides/webhooks-ui"]
+          },
+          {
+            "group": "Recipes",
+            "pages": [
+              "guides/agent-loop",
+              "guides/context-contracts",
+              "guides/reviews",
+              "guides/templates",
+              "guides/create-room"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Tools",
+        "groups": [
+          {
+            "group": "Reference",
+            "pages": [
+              "tools/overview",
+              "tools/plan",
+              "tools/context",
+              "tools/events",
+              "tools/presence-locks",
+              "tools/vars",
+              "tools/rooms",
+              "tools/reviews",
+              "tools/search-analytics"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API",
+        "groups": [
+          {
+            "group": "HTTP",
+            "pages": [
+              "api/overview",
+              "api/rooms-and-keys",
+              "api/sse",
+              "api/webhooks"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Changelog",
+        "groups": [
+          {
+            "group": "Releases",
+            "pages": ["changelog"]
+          }
+        ]
+      }
+    ]
+  },
+  "seo": {
+    "indexing": "all"
+  }
+}

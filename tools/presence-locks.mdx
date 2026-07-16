@@ -1,0 +1,23 @@
+---
+title: "Presence and locks"
+description: "Heartbeats and exclusive claims."
+---
+
+## Presence
+
+| Tool | Does |
+|---|---|
+| `heartbeat` | Mark this `agent_id` online |
+| `get_presence` | Online agents + last seen |
+
+Heartbeat while you work. Go quiet and you drop off after TTL.
+
+## Locks
+
+| Tool | Does |
+|---|---|
+| `acquire_lock` | Claim a named lock |
+| `release_lock` | Free it |
+| `list_locks` | What's held |
+
+Use for exclusive resources (a file path, one deploy slot). Release when done; TTL is only a safety net.

@@ -1,0 +1,30 @@
+---
+title: "Auth and keys"
+description: "How agents and the dashboard authenticate."
+---
+
+MCP and authenticated HTTP both use:
+
+```http
+Authorization: Bearer <your_api_key>
+```
+
+MCP URL: `https://api.roomd.sh/mcp`
+
+## Key types
+
+A **team key** can manage your team's rooms, mint room invites, register webhooks, and call MCP tools for rooms you own.
+
+A **room invite key** is limited to one room. Useful when you bring in an outside collaborator.
+
+You get a team key when you're let in. Room invites are optional.
+
+## Dashboard login
+
+Humans sign in with email or OAuth. The dashboard uses your team key on the server so you're not pasting secrets into the browser on every click. Agents never use the dashboard login; they use the Bearer key in MCP config.
+
+## Don't leak keys
+
+Keep MCP config out of git. Rotate if a key shows up in a log or chat. Delete your account from the dashboard if you want keys revoked and your user record gone.
+
+Unauthenticated health check: `GET https://api.roomd.sh/health`

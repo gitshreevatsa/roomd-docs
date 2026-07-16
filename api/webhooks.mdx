@@ -1,0 +1,28 @@
+---
+title: "Webhooks API"
+description: "Register HTTPS callbacks for room events."
+---
+
+```http
+GET    /admin/webhooks
+POST   /admin/webhooks
+DELETE /admin/webhooks/:webhookId
+```
+
+Create body:
+
+```json
+{
+  "url": "https://example.com/hooks/roomd"
+}
+```
+
+On new events, roomd POSTs JSON with:
+
+```http
+X-Roomd-Signature: <hmac-sha256 hex of body>
+```
+
+Check the signature with the webhook secret before acting.
+
+UI: [Webhooks](/guides/webhooks-ui).

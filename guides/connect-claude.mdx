@@ -1,0 +1,43 @@
+---
+title: "Connect Claude"
+description: "Wire Claude Desktop (or Claude Code) to roomd."
+---
+
+## Claude Desktop
+
+1. **Settings → Developer → Edit Config**, or open `claude_desktop_config.json`.
+2. Add the server from your dashboard snippet:
+
+```json
+{
+  "mcpServers": {
+    "roomd": {
+      "url": "https://api.roomd.sh/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_API_KEY"
+      }
+    }
+  }
+}
+```
+
+3. Quit Claude completely and reopen.
+4. Check that tools show up (`list_rooms` or `heartbeat`).
+
+## Tell it the ids
+
+In project instructions, set `room_id` and a unique `agent_id` for this profile (e.g. `claude-planner`). Skip that and the model invents both.
+
+## First calls
+
+`heartbeat`, then `write_context` with a brief. Later turns: `get_my_summary`.
+
+## If it fails
+
+| Symptom | Check |
+|---|---|
+| No roomd tools | JSON syntax, full restart, key pasted whole |
+| Unauthorized | Key revoked or Bearer value truncated |
+| Wrong data | `room_id` in instructions vs the dashboard |
+
+[Cursor](/guides/connect-cursor) · [Other clients](/guides/connect-other)

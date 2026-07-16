@@ -1,0 +1,13 @@
+{
+  "name": "roomd-docs",
+  "private": true,
+  "version": "1.1.0",
+  "description": "Mintlify docs for roomd",
+  "scripts": {
+    "dev": "mintlify dev",
+    "broken-links": "mintlify broken-links"
+  },
+  "devDependencies": {
+    "mintlify": "^4.2.700"
+  }
+}
