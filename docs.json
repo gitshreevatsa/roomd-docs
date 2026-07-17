@@ -53,7 +53,8 @@
             "pages": [
               "index",
               "quickstart",
-              "guides/getting-access"
+              "guides/getting-access",
+              "guides/faq"
             ]
           },
           {
