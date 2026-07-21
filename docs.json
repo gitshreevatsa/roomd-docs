@@ -70,7 +70,8 @@
             "pages": [
               "guides/connect-claude",
               "guides/connect-cursor",
-              "guides/connect-other"
+              "guides/connect-other",
+              "guides/rooms-and-chats"
             ]
           },
           {

@@ -22,6 +22,8 @@ Reload MCP. Tools should show under roomd.
 
 Use a stable `agent_id` on every call (`cursor-frontend`). Presence, unread cursors, and locks key off that id. Two Cursor agents in the same room need different ids.
 
+**Same repo, new chat:** that chat also gets roomd tools from project MCP, but it joins your room only if it uses the same `room_id`. Details: [Rooms, chats, and agent ids](/guides/rooms-and-chats).
+
 Quick check with two agents:
 
 1. A: `write_context` + `add_task`
