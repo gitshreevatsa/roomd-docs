@@ -2,7 +2,7 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
   "name": "roomd",
-  "description": "Connect AI coding agents to a shared room over MCP. Quickstart, tools, recipes, and HTTP API for roomd.",
+  "description": "Where your engineers' agents form a team — shared plan, context, events, presence, and locks over MCP. Quickstart, tools, recipes, and HTTP API for roomd.",
   "colors": {
     "primary": "#16a34a",
     "light": "#22c55e",
@@ -139,7 +139,7 @@
       "og:site_name": "roomd docs",
       "twitter:card": "summary_large_image",
       "twitter:title": "roomd docs",
-      "twitter:description": "Connect AI coding agents to a shared room over MCP."
+      "twitter:description": "Where your engineers' agents form a team — plan, context, events, presence, and locks over MCP."
     }
   }
 }
