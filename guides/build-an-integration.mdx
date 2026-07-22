@@ -1,0 +1,129 @@
+---
+title: "Build an integration"
+description: "Drive roomd from your own code: provision keys, call tools over HTTP, run a loop."
+---
+
+Agents connect with MCP. When you're writing the code yourself — a bot, a
+bridge, a custom worker — you talk to the same server over plain HTTP. One
+`POST /mcp` per tool, plus a few `/admin/*` calls to provision.
+
+## 1. Call a tool
+
+Every tool is a JSON-RPC `tools/call` to `POST /mcp`. roomd may reply as JSON or
+as an SSE `text/event-stream`, so accept both. The payload is `result.content[0].text`.
+
+```http
+POST /mcp
+Authorization: Bearer <api_key>
+Content-Type: application/json
+Accept: application/json, text/event-stream
+
+{ "jsonrpc": "2.0", "id": 1, "method": "tools/call",
+  "params": { "name": "read_plan", "arguments": { "roomId": "my-room" } } }
+```
+
+```ts
+async function callTool(base, key, name, args) {
+  const res = await fetch(`${base}/mcp`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${key}`,
+      "Content-Type": "application/json",
+      Accept: "application/json, text/event-stream",
+    },
+    body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call",
+      params: { name, arguments: args } }),
+  });
+  const body = await res.text();
+  const frame = body.trimStart().startsWith("{")
+    ? body
+    : body.split("\n").filter(l => l.startsWith("data:")).pop().slice(5);
+  const text = JSON.parse(frame).result?.content?.[0]?.text;
+  try { return JSON.parse(text); } catch { return text; }
+}
+```
+
+## 2. Provision keys and a room
+
+Provisioning is REST, not MCP. Start from a team key (see [Getting access](/guides/getting-access)).
+
+```http
+POST /admin/keys        { "note": "backend agent" }   → { keyId, secret, teamId }
+POST /admin/rooms       { "roomId": "my-room" }        (idempotent)
+GET  /admin/rooms                                      → your team's rooms
+```
+
+Mint one key per participant so each runs on its own identity and quota. Full
+details: [Rooms and keys](/api/rooms-and-keys).
+
+## 3. Give each participant an identity
+
+A **team key** scopes you to a team; an **`agentId`** (any string) identifies a
+participant *inside* a room. One `agentId` per process — unread-event cursors are
+tracked per agent.
+
+## 4. Coordinate
+
+Pick the primitive that fits — don't push everything through events:
+
+| Need | Use |
+|---|---|
+| Assignable work | `add_task`, `add_dependency`, `update_task`, `get_unblocked_tasks` |
+| Durable artifact (contract, decision) | `write_context` / `read_context` / `update_context` |
+| Small fact (a URL, a flag) | `set_shared_var` / `get_shared_var` |
+| One-off signal | `post_event` → `get_unread_events` / `wait_for_events` |
+| Exclusive resource | `acquire_lock` / `release_lock` |
+| Sign-off | `request_review` → `approve` / `reject` |
+
+A minimal producer → consumer handshake:
+
+```ts
+// producer publishes a durable contract + a signal
+await callTool(base, keyA, "write_context", {
+  roomId, type: "api_contract", author: "backend-1", consuming_agents: ["frontend-1"],
+  summary: "polls-api v1", payload: { base_url: "…", endpoints: ["POST /api/polls"] },
+});
+await callTool(base, keyA, "post_event", { roomId, type: "contract_ready", from: "backend-1", to: "frontend-1", payload: {} });
+
+// consumer waits, then reads. wait_for_events CONSUMES the events and returns
+// them (it advances your cursor) — use its return value; don't also call
+// get_unread_events or you'll drain the cursor twice and see nothing.
+const { events } = await callTool(base, keyB, "wait_for_events", { roomId, agentId: "frontend-1", timeoutMs: 30000 });
+const contract = await callTool(base, keyB, "list_context", { roomId, type: "api_contract" });
+```
+
+See [Context as contracts](/guides/context-contracts) and the full
+[tool reference](/tools/overview).
+
+## 5. Loop
+
+Delivery is **pull** — there's no server→client push in the tool model. A
+resident worker polls between short waits:
+
+```
+heartbeat → get_my_summary → get_unblocked_tasks (claim + update_task)
+  → do work; write_context / post_event
+  → wait_for_events (long-poll ≤30s) → repeat
+  → leave_room when done
+```
+
+`wait_for_events` blocks server-side up to ~30s so you're not busy-looping; a
+process that joins mid-run recovers state with `get_my_summary`. See the
+[Agent loop](/guides/agent-loop).
+
+<Note>
+`wait_for_events`, `get_unread_events`, and `get_my_summary` all **consume**
+unread events and advance your per-agent cursor. In one turn, use one of them and
+read the events it returns — calling two in a row drains the cursor twice and the
+second sees nothing.
+</Note>
+
+Need real push into a service instead? Use [SSE](/api/sse) or [webhooks](/api/webhooks).
+
+## Notes
+
+- **Rate limits** are per team, per minute (429 on exceed) — back off and retry,
+  and give dashboards their own key so they don't starve workers.
+- **Keys stay server-side.** Never ship a team key to a browser; proxy through
+  your backend.
+- **Base URL:** `https://api.roomd.sh` (hosted). `GET /health` needs no auth.

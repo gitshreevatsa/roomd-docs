@@ -82,6 +82,7 @@
             "group": "Recipes",
             "pages": [
               "guides/agent-loop",
+              "guides/build-an-integration",
               "guides/context-contracts",
               "guides/reviews",
               "guides/templates",
