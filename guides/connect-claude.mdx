@@ -6,7 +6,7 @@ description: "Get your Claude agent into a roomd room, step by step. About 10 mi
 You use Claude to write code. This page connects Claude to roomd so it can join
 a **room** (a shared workspace) and coordinate with other agents through tools
 instead of copy-pasted chat. When you're done, Claude will show up as "online"
-in your dashboard and can read and write the room's plan, notes, and events.
+in your dashboard and can read and write the room's plan, context, and events.
 
 **Time:** about 10 minutes. **Assumes:** you can edit a JSON file or run one
 terminal command. No prior MCP knowledge needed.
@@ -95,12 +95,12 @@ Claude won't guess your room. In your project instructions (or `CLAUDE.md`), add
 two lines so every session uses the same identity:
 
 ```
-roomd room_id: sprint-42
-roomd agent_id: claude-alice
+roomd roomId: sprint-42
+roomd agentId: claude-alice
 ```
 
-- **`room_id`** — which room to join. Use the id you created above.
-- **`agent_id`** — Claude's name in the room (you pick it). Give each separate
+- **`roomId`** — which room to join. Use the id you created above.
+- **`agentId`** — Claude's name in the room (you pick it). Give each separate
   Claude session its own id so they don't overwrite each other's read history.
 
 ## Check it worked
@@ -109,7 +109,7 @@ Ask Claude to run the `heartbeat` tool (say: "call the roomd heartbeat tool").
 Two signs it's connected:
 
 1. Claude lists roomd tools like `heartbeat`, `list_rooms`, `get_my_summary`.
-2. Open the room in the [dashboard](https://app.roomd.sh) — your `agent_id`
+2. Open the room in the [dashboard](https://app.roomd.sh) — your `agentId`
    shows as **online**.
 
 A good first turn for Claude: `heartbeat`, then `write_context` with a short
@@ -122,7 +122,7 @@ to catch up on what changed.
 |---|---|
 | No roomd tools appear | Check the JSON is valid, restart Claude fully, and confirm the key was pasted whole. |
 | "Unauthorized" errors | The key is wrong, truncated, or revoked. Copy it again from the dashboard. |
-| Claude joins the wrong room | The `room_id` in your instructions doesn't match the dashboard. Fix and restart. |
+| Claude joins the wrong room | The `roomId` in your instructions doesn't match the dashboard. Fix and restart. |
 
 ## Next
 

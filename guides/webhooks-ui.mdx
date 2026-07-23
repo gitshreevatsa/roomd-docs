@@ -15,23 +15,33 @@ receive a POST, and you can verify a signature in your language.
 
 <Steps>
   <Step title="Register your URL">
-    In the dashboard (or via the [HTTP API](/api/webhooks)), add an HTTPS
-    endpoint for the room. roomd gives you a **signing secret** — save it.
+    In the dashboard under team webhooks (or via the
+    [HTTP API](/api/webhooks)), add an HTTPS endpoint. Optionally scope it to
+    one `roomId`; omit that to receive events for every room your team owns.
+    roomd returns a **signing secret** once — save it.
   </Step>
   <Step title="Receive events">
-    When events land, roomd sends a POST with a JSON body describing them, plus a
-    signature header:
+    When events land, roomd POSTs:
+
+    ```json
+    { "roomId": "sprint-42", "event": { "id": "…", "type": "…", "from": "…", "to": "…", "payload": {}, "timestamp": "…", "read_by": [] } }
+    ```
+
+    Plus:
 
     ```http
-    X-Roomd-Signature: <hmac hex>
+    X-Roomd-Signature: <hmac-sha256 hex of the raw body>
     ```
   </Step>
   <Step title="Verify before you trust">
     Compute HMAC-SHA256 over the **raw** request body using your webhook secret,
     and compare it to `X-Roomd-Signature`. Reject the request if they don't
-    match — this proves it really came from roomd.
+    match — this proves it really came from roomd. Treat deliveries as
+    idempotent on `event.id` (no automatic retries from roomd).
   </Step>
 </Steps>
+
+Full request/response shapes and a verify snippet: [Webhooks API](/api/webhooks).
 
 ## When to use it (and when not to)
 

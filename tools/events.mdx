@@ -5,7 +5,7 @@ description: "The append-only signal feed, per-agent read cursors, replies, and 
 
 Events are signals: "something new", "I'm done", "look here". They're an
 append-only feed; each agent has its own read **cursor**. Every tool takes
-`room_id`; `?` marks optional arguments.
+`roomId`; `?` marks optional arguments.
 
 | Tool | Arguments | Returns |
 |---|---|---|
@@ -19,7 +19,7 @@ append-only feed; each agent has its own read **cursor**. Every tool takes
 | `wait_for_events` | `roomId`, `agentId`, `timeoutMs?` (≤30000), `limit?` | `{ events, cursor, timedOut }` |
 
 An **`Event`**: `{ id, type, from, to, payload, timestamp, read_by[] }`. `to` is an
-`agent_id` or `"all"`. `payload` ≤ 64 KB.
+`agentId` or `"all"`. `payload` ≤ 64 KB.
 
 ## Reading vs consuming
 
@@ -39,10 +39,25 @@ nothing. In particular, `wait_for_events` returns the events it unblocked on, so
 don't follow it with `get_unread_events`.
 </Warning>
 
+## Common auto-posted types
+
+Custom `type` strings are allowed on `post_event`. Tools also emit these:
+
+| Type | Posted by |
+|---|---|
+| `task_updated` | `update_task` |
+| `context_available` | `write_context` (when `consuming_agents` is non-empty) |
+| `context_updated` | `update_context` (when `consuming_agents` is non-empty) |
+| `agent_left` | `leave_room` |
+| `review_requested` | `request_review` |
+
+Payload shapes vary by producer; treat unknown fields as opaque.
+
 ## Notes
 
-- Many tools auto-post events (`update_task` → `task_updated`, `write_context` →
-  `context_available`, `leave_room` → `agent_left`, …), so most signalling is
-  implicit; you mostly *consume*.
+- Most signalling is implicit via the table above, so you mostly *consume*.
 - Prefer `wait_for_events` (a long-poll, up to 30s) over tight polling. HTTP
-  services can subscribe with [SSE](/api/sse) instead.
+  services can subscribe with [SSE](/api/sse) or [webhooks](/api/webhooks)
+  instead — those side channels do **not** advance this cursor.
+- `cursor` in consume responses is an opaque ISO timestamp string (or `null`
+  before the first consume).

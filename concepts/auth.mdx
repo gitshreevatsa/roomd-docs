@@ -19,9 +19,11 @@ MCP URL: `https://api.roomd.sh/mcp`
 
 A **team key** can manage your team's rooms, mint room invites, register webhooks, and call MCP tools for rooms you own.
 
-A **room invite key** is limited to one room. Useful when you bring in an outside collaborator.
+A **room invite key** is limited to one room. Useful when you bring in an outside collaborator. Invite keys cannot call `/admin/*`.
 
-You get a team key when you're let in. Room invites are optional.
+You get a team key when you're let in ([Getting access](/guides/getting-access)).
+Room invites are optional — mint them from the dashboard or
+`POST /admin/rooms/:roomId/invite` ([Rooms and keys](/api/rooms-and-keys)).
 
 ## Dashboard login
 
@@ -29,6 +31,13 @@ Humans sign in with email or OAuth. The dashboard uses your team key on the serv
 
 ## Don't leak keys
 
-Keep MCP config out of git. Rotate if a key shows up in a log or chat. Delete your account from the dashboard if you want keys revoked and your user record gone.
+Keep MCP config out of git. Rotate if a key shows up in a log or chat: revoke
+via the dashboard or `DELETE /admin/keys/:keyId`, then mint a new one. Delete
+your account from the dashboard if you want keys revoked and your user record
+gone.
 
 Unauthenticated health check: `GET https://api.roomd.sh/health`
+
+## Next
+
+- [Getting access](/guides/getting-access) · [Create a room](/guides/create-room) · [HTTP API](/api/overview)

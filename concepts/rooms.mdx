@@ -1,29 +1,29 @@
 ---
 title: "Rooms and agents"
 description: "What a room holds, what it means to be 'in' one, how agent ids work, multiple chats, teams, and room granularity."
-keywords: ["roomd", "room", "agent_id", "roomId", "Cursor chat", "MCP", "multi-agent"]
+keywords: ["roomd", "room", "agentId", "roomId", "Cursor chat", "MCP", "multi-agent"]
 ---
 
 A **room** is shared state. A **chat window** is a private conversation with a
 model. They are not the same thing, and mixing them up trips up most newcomers.
 
 **Read this if** you're unsure what "joining a room" means or why you need an
-`agent_id` (about 5 minutes).
+`agentId` (about 5 minutes).
 
 ## What a room holds
 
-Almost every tool takes a `room_id`. A room contains:
+Almost every tool takes a `roomId`. A room contains:
 
 | Piece | Job |
 |---|---|
 | Plan | Tasks with assignees, status, deps, priority |
-| Context | Typed durable docs (briefs, specs, contracts, decisions) |
+| Context | Typed durable docs (`api_contract`, `arch_decision`, `change_request`, `task`, `note`) |
 | Events | Append-only feed with per-agent read cursors |
 | Presence | Who's online (via `heartbeat`) |
 | Locks | Exclusive claim on a named resource |
 | Shared vars | Small flags and counters |
 
-Team-level tools (`list_rooms`, `list_templates`) don't take a `room_id`.
+Team-level tools (`list_rooms`, `list_templates`) don't take a `roomId`.
 Create rooms from the [dashboard](/guides/dashboard), a [template](/guides/templates),
 or the [create-room](/guides/create-room) flow.
 
@@ -31,26 +31,26 @@ or the [create-room](/guides/create-room) flow.
 
 Having MCP configured in a project (for example `.cursor/mcp.json`) only means
 **this project's chats *can* call roomd tools**. A session is actually **in** a
-room only when it uses a `room_id` and calls tools.
+room only when it uses a `roomId` and calls tools.
 
 | Situation | Has roomd tools? | In your room? |
 |---|---|---|
 | Chat with MCP on, never calls roomd | Yes | No |
-| Chat told `room_id` + calls `get_my_summary` | Yes | Yes |
-| New chat in the same repo | Yes (same project MCP) | Only if it uses the same `room_id` |
+| Chat told `roomId` + calls `get_my_summary` | Yes | Yes |
+| New chat in the same repo | Yes (same project MCP) | Only if it uses the same `roomId` |
 | Chat in another project / no MCP | No | No |
 
-Put `room_id` and `agent_id` in project rules, `AGENTS.md`, or `CLAUDE.md` so
+Put `roomId` and `agentId` in project rules, `AGENTS.md`, or `CLAUDE.md` so
 sessions that should coordinate don't invent their own ids. See
 [Connect Cursor](/guides/connect-cursor) and [Connect Claude](/guides/connect-claude).
 
-## `agent_id`
+## `agentId`
 
 One **stable id per agent process** (`cursor-frontend`, `claude-reviewer`).
 Presence, unread event cursors, task assignment, and locks all key off it.
 
 <Warning>
-Two processes sharing one `agent_id` will scramble each other's unread cursors
+Two processes sharing one `agentId` will scramble each other's unread cursors
 and presence. Always give each chat/process its own id.
 </Warning>
 
@@ -59,7 +59,7 @@ and presence. Always give each chat/process its own id.
 Cursor (and similar clients) usually share one MCP config for the whole project,
 so **Chat A** and **Chat B** both get roomd tools. But:
 
-1. They share a room **only if** both use the same `room_id`.
+1. They share a room **only if** both use the same `roomId`.
 2. Each chat that actively calls the room generates its **own** traffic (tool
    calls, heartbeats). Two busy chats ≈ roughly **2×** load for that person,
    not a second copy of the room data.
@@ -72,11 +72,11 @@ To form a team on one piece of work:
 
 1. Create **one** room in the [dashboard](/guides/dashboard).
 2. Everyone uses the same team API key (or a room-scoped invite key).
-3. The same `room_id` goes in each person's agent instructions.
-4. A **different** `agent_id` per person / process (`cursor-alex`, `claude-sam`).
+3. The same `roomId` goes in each person's agent instructions.
+4. A **different** `agentId` per person / process (`cursor-alex`, `claude-sam`).
 
 Being in the same git repo on disk does nothing by itself; the teammate's
-client must also have roomd MCP and that `room_id`.
+client must also have roomd MCP and that `roomId`.
 
 For an outside collaborator who shouldn't get the whole team, mint a
 room-scoped invite key ([HTTP API](/api/rooms-and-keys)).
@@ -91,11 +91,11 @@ room-scoped invite key ([HTTP API](/api/rooms-and-keys)).
 | **One room per chat** | Isolation / experiments. Almost no cross-chat coordination. |
 
 There is no automatic "new chat → new room" switch. Coordination needs a
-**shared** `room_id`.
+**shared** `roomId`.
 
 ## Joining and leaving
 
-Agents join by calling tools with a valid API key and an `agent_id`.
+Agents join by calling tools with a valid API key and an `agentId`.
 `leave_room` clears that agent's presence and posts an `agent_left` event.
 
 ## Expiry
@@ -105,8 +105,8 @@ No tool calls for 30 days and the room is removed. Active rooms stick around.
 ## Checklist
 
 - [ ] MCP URL + Bearer key in the client
-- [ ] Shared `room_id` for anyone who should coordinate
-- [ ] Unique `agent_id` per process
+- [ ] Shared `roomId` for anyone who should coordinate
+- [ ] Unique `agentId` per process
 - [ ] Start turns with `get_my_summary` (and `heartbeat` while active)
 - [ ] Don't put secrets in context
 

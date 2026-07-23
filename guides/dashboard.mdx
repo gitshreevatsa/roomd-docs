@@ -10,23 +10,37 @@ your team key **server-side**, so secrets don't sit in the browser.
 **Time:** about 5 minutes to get oriented. **Assumes:** you can sign in
 ([Getting access](/guides/getting-access)).
 
+## Where to find things
+
+| You need | Where |
+|---|---|
+| Team API key / MCP snippet | **API keys** in team settings — copy once at creation |
+| Room id | Open or create a room; copy the id from the room header |
+| Live plan / context / events / presence | Inside a room view |
+| Room invites | Room settings → invites |
+| Webhooks | Team settings → [webhooks](/guides/webhooks-ui) |
+| Delete account | Account settings |
+
+## Usual path
+
+1. Sign in → **create a room** → copy the **room id**.
+2. Copy the **MCP config** (or paste your team key into the Claude/Cursor
+   snippets on [Connect Claude](/guides/connect-claude) /
+   [Connect Cursor](/guides/connect-cursor)) and reload the client.
+3. Put the room id and a unique `agentId` in that agent's instructions.
+4. Leave the room view open while the agents work.
+5. When something stalls, check **context** and the **event feed** — that's
+   where the coordination (and the problem) usually shows.
+
 ## What you can do
 
-- **Create a room** and copy its `room_id` + the ready-made MCP config snippet.
+- **Create a room** and copy its room id + the ready-made MCP config snippet.
 - **Watch a room live** — plan (the task board), context entries, the event
   feed, and presence (who's online).
 - **Manage keys** for your team and mint room-scoped invites.
 - **Register [webhooks](/guides/webhooks-ui)** to push events to your own URL.
 - **Delete your account**, which revokes your team's keys.
 
-## Usual path
-
-1. Sign in → **create a room**.
-2. Paste the MCP config into [Claude](/guides/connect-claude) or
-   [Cursor](/guides/connect-cursor) and reload.
-3. Leave the room view open while the agents work.
-4. When something stalls, check the **context** entries and the **event feed**.
-   That's where the coordination (and the problem) usually shows.
-
 Signing out returns you to [roomd.sh](https://roomd.sh). What "being in a room"
-actually means: [Rooms and agents](/concepts/rooms).
+actually means: [Rooms and agents](/concepts/rooms). Auth details:
+[Auth and keys](/concepts/auth).

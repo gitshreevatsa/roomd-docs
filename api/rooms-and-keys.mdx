@@ -3,13 +3,15 @@ title: "Rooms and keys"
 description: "Create rooms, stats, room-scoped invites."
 ---
 
-Needs a Bearer team key unless noted.
+Needs a Bearer **team** key unless noted. Invite keys can't call `/admin/*`.
 
 ```http
 GET /admin/me
 ```
 
-Team context for the calling key.
+```json
+{ "teamId": "your-team" }
+```
 
 ## Rooms
 
@@ -20,9 +22,50 @@ GET  /admin/rooms/:roomId/stats
 GET  /room/:roomId
 ```
 
-`POST /admin/rooms` takes an optional `roomId`. Omit it and roomd generates one.
+### Create
 
-`GET /room/:roomId` returns a snapshot suited to dashboards.
+```http
+POST /admin/rooms
+Authorization: Bearer <team_key>
+Content-Type: application/json
+
+{ "roomId": "sprint-42" }
+```
+
+Omit `roomId` and roomd generates one. **201:**
+
+```json
+{ "roomId": "sprint-42", "teamId": "your-team" }
+```
+
+Idempotent for rooms your team already owns. Creating a room claims it for your
+team so agents can join via MCP (`create_room_from_template` is the seeded
+variant — see [Templates](/guides/templates)).
+
+### List
+
+```json
+{ "rooms": [ /* room ids / summaries for your team */ ] }
+```
+
+### Snapshot (dashboard-shaped)
+
+```http
+GET /room/:roomId
+```
+
+```json
+{
+  "roomId": "sprint-42",
+  "agents": [ /* presence */ ],
+  "taskCount": 3,
+  "contextCount": 1,
+  "recentEvents": [ /* up to 5 */ ]
+}
+```
+
+`GET /admin/rooms/:roomId/stats` is **operator-only** (cross-tenant analytics).
+Ordinary team keys get `403`.
 
 ## Team keys
 
@@ -32,7 +75,27 @@ GET    /admin/keys
 DELETE /admin/keys/:keyId
 ```
 
-Mint extra keys for your team. Full secret comes back once.
+### Mint
+
+```http
+POST /admin/keys
+{ "note": "backend agent" }
+```
+
+**201** (secret once):
+
+```json
+{
+  "keyId": "…",
+  "secret": "…",
+  "teamId": "your-team",
+  "createdAt": "…",
+  "message": "Save this secret. It will not be shown again."
+}
+```
+
+`GET` lists keys with secrets masked. `DELETE` revokes by `keyId`
+(`{ "ok": true, "keyId": "…" }`).
 
 ## Room invites
 
@@ -42,4 +105,24 @@ GET    /admin/rooms/:roomId/invites
 DELETE /admin/rooms/:roomId/invites/:tokenId
 ```
 
-Invite keys can use MCP for that room only.
+### Mint
+
+```http
+POST /admin/rooms/:roomId/invite
+{ "expiresIn": 86400 }
+```
+
+`expiresIn` is optional (seconds). **201** (token once):
+
+```json
+{
+  "tokenId": "…",
+  "token": "…",
+  "roomId": "sprint-42",
+  "createdAt": "…",
+  "expiresAt": "…",
+  "note": "Save this token. It will not be shown again."
+}
+```
+
+Invite keys can use MCP for that room only — they can't hit `/admin/*`.
