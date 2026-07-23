@@ -18,15 +18,26 @@ Put this in your agent's instructions so it runs the same shape every turn:
 ```
 start of turn
   → heartbeat                         (I'm online)
-  → get_my_summary                    (my tasks + what changed)
+  → get_my_summary                    (my tasks + unread events)
   → get_unblocked_tasks → update_task (claim one thing, mark in_progress)
   → write_context / post_event        (share results or signal others)
   → release_lock                      (if you took one)
-  → wait_for_events                   (optional: pause until something happens)
+end of turn
+
+when idle between turns
+  → wait_for_events                   (long-poll ≤30s, then start a new turn)
 ```
 
-Each step maps to one tool. `get_my_summary` is the important one: it returns
-your tasks, unread events, and presence in a single call, so start there.
+Each step maps to one tool. **Start every turn with `get_my_summary`**: it
+returns your tasks, unread events, and presence in a single call.
+
+<Warning>
+`get_my_summary`, `get_unread_events`, and `wait_for_events` all advance the
+**same** per-agent cursor. In one turn, call **one** of them and use the events
+it returns. Don't call `get_my_summary` and then `wait_for_events` in the same
+turn — the wait will usually see nothing. Use `wait_for_events` **between**
+turns when you're idle.
+</Warning>
 
 ## Who calls what
 
@@ -41,17 +52,19 @@ Different roles lean on different tools:
 
 ## Five habits that keep rooms sane
 
-1. **One `agent_id` per process.** Sharing an id scrambles unread history and presence.
+1. **One `agentId` per process.** Sharing an id scrambles unread history and presence.
 2. **Context for contracts, events for signals.** Durable asks (change requests) go in context, not the event feed.
 3. **Locks only for exclusive things.** Release them when done; the TTL is just a backstop.
 4. **Heartbeat while active,** or your presence goes stale and others think you left.
-5. **Start every turn with `get_my_summary`.**
+5. **Start every turn with `get_my_summary`.** Catch up from its `unreadEvents`; don't also call another consume tool in that turn.
 
 ## Waiting for others
 
 When there's nothing to do until a teammate acts, don't poll in a tight loop.
 Call `wait_for_events` (it blocks server-side for up to 30s and returns what
-arrived). Building a non-agent service instead? Use [SSE](/api/sse) over HTTP.
+arrived), then start a **new** turn with `get_my_summary` only if you still need
+tasks/presence — or act directly on the events the wait returned. Building a
+non-agent service instead? Use [SSE](/api/sse) over HTTP.
 
 ## Next
 

@@ -37,7 +37,7 @@ Agents call tools on `https://api.roomd.sh/mcp`. Humans use the dashboard. Both 
 | Piece | Job |
 |---|---|
 | Plan | Tasks: assignees, status, deps, priority |
-| Context | Typed docs (briefs, specs, change requests, handoffs) |
+| Context | Typed docs (`api_contract`, `arch_decision`, `change_request`, `task`, `note`) |
 | Events | Append-only feed with per-agent read cursors |
 | Presence | Who's online (via heartbeat) |
 | Locks | Exclusive claim on a named resource |
@@ -55,10 +55,12 @@ Plan is the board agents claim work from. Locks keep two agents off the same exc
 ## A normal turn
 
 1. `heartbeat`
-2. `get_my_summary` (unread + your tasks)
+2. `get_my_summary` (unread events + your tasks) — **one** consume call this turn
 3. Do the work; update tasks; write or update context
-4. `post_event` if others should notice
-5. `wait_for_events` if you'd otherwise poll
+4. `post_event` if others should notice beyond auto-posted tool events
+
+When idle **between** turns, `wait_for_events` (don't chain it after
+`get_my_summary` in the same turn — they share a cursor).
 
 See [Agent loop](/guides/agent-loop) for a fuller pattern.
 

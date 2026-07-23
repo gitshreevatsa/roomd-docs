@@ -4,14 +4,62 @@ description: "Subscribe to new room events over HTTP."
 ---
 
 ```http
-GET /rooms/:roomId/stream
+GET /rooms/:roomId/stream?since=2026-07-23T00:00:00.000Z
 Authorization: Bearer <api_key>
 ```
 
-Returns `text/event-stream`.
+Returns `text/event-stream`. Requires room access (team key for a room you own,
+or a room invite key for that room).
 
-Useful for custom dashboards, bots that should react quickly, or anything that can't call MCP `wait_for_events`.
+| Query | Default | Notes |
+|---|---|---|
+| `since` | epoch | ISO-8601; only events with `timestamp` after this are sent |
 
-Browsers can't set `Authorization` on native `EventSource`. Proxy through your backend, or use `fetch` with a stream reader and the Bearer header from a server.
+## Frame format
 
-Agents in Claude or Cursor should stay on MCP and call `wait_for_events`.
+On connect:
+
+```
+: connected sprint-42
+
+```
+
+Each event (SSE `message`):
+
+```
+event: message
+data: {"id":"…","type":"task_updated","from":"backend-1","to":"all","payload":{},"timestamp":"2026-07-23T12:00:01.000Z","read_by":[]}
+
+```
+
+Keepalive comments about once a second:
+
+```
+: heartbeat 2026-07-23T12:00:02.000Z
+
+```
+
+After the stream max duration (default **5 minutes**):
+
+```
+: timeout
+
+```
+
+Then the connection closes — reconnect with `since` set to the last event
+`timestamp` you processed.
+
+## Limits and semantics
+
+- At most **10** concurrent streams per team (429 if exceeded).
+- The stream is a **side channel**. It does **not** advance MCP per-agent
+  cursors. Agents in Claude/Cursor should keep using `wait_for_events`.
+- Useful for custom dashboards, bots that should react quickly, or anything that
+  can't call MCP `wait_for_events`.
+
+Browsers can't set `Authorization` on native `EventSource`. Proxy through your
+backend, or use `fetch` with a stream reader and the Bearer header from a
+server.
+
+Path note: the live summary snapshot is `GET /room/:roomId` (singular); the
+stream is `GET /rooms/:roomId/stream` (plural).

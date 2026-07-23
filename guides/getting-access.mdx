@@ -13,26 +13,36 @@ you both.
 
 <Steps>
   <Step title="Waitlist">
-    Sign up on [roomd.sh](https://roomd.sh). When you're approved you can sign
-    in, and your team gets a key.
+    Join the [waitlist](https://roomd.sh/waitlist). When you're approved you can
+    sign in at [app.roomd.sh/login](https://app.roomd.sh/login), and your team
+    gets a key.
   </Step>
   <Step title="Invite">
-    Someone on a team emails you a key. Sign in at
-    [app.roomd.sh/login](https://app.roomd.sh/login) and use it. The full key is
-    shown once, so save it.
+    A teammate mints a **room invite** (or shares access) and emails you. Sign
+    in at [app.roomd.sh/login](https://app.roomd.sh/login). If they sent a room
+    invite token, use that as the Bearer key for that room only — it is not the
+    same as your team's full API key.
   </Step>
 </Steps>
 
 ## Get your key
 
-Once you're signed in, the dashboard holds a key for your team. Copy it (or the
-ready-made MCP config snippet) when you connect [Claude](/guides/connect-claude)
-or [Cursor](/guides/connect-cursor).
+Once you're signed in:
+
+1. Open the [dashboard](https://app.roomd.sh).
+2. Find **API keys** (team settings / keys area).
+3. Copy the team API key, or the ready-made **MCP config** snippet next to it.
+4. Paste that into [Claude](/guides/connect-claude) or
+   [Cursor](/guides/connect-cursor).
+
+You'll also need a **room id** from a room you create — that's separate from the
+key. See [Create a room](/guides/create-room).
 
 <Warning>
 The full secret is shown **only at creation time**. After that you see just a
-hint (the last four characters). Treat the key like a password. If it leaks, ask
-an admin to revoke it and mint a new one.
+hint (the last four characters). Treat the key like a password. If it leaks,
+revoke it from the dashboard (or `DELETE /admin/keys/:keyId`) and mint a new
+one.
 </Warning>
 
 ## What a key can do
@@ -40,7 +50,7 @@ an admin to revoke it and mint a new one.
 A **team key** manages your team's rooms and calls tools for rooms you own. If
 you want to bring in an outside collaborator without handing over the whole
 team, mint a **room invite key** instead (limited to one room). See
-[Auth and keys](/concepts/auth).
+[Auth and keys](/concepts/auth) and [Rooms and keys](/api/rooms-and-keys).
 
 ## Next
 

@@ -12,20 +12,22 @@ trust the shape instead of re-reading prose. This page shows what goes where.
 
 ## What context is
 
-A context entry is a small typed document with a `type` and a `key`. Updates
-keep a short history, so you can see what changed later with
-`get_context_history` and `diff_context`.
+A context entry is a typed document. You pick a `type`; the `payload` must match
+that type's schema or the write is rejected. Updates keep a short history, so
+you can see what changed later with `get_context_history` and `diff_context`.
 
-Types that work well in practice:
+Validated types:
 
 | Type | Use it for |
 |---|---|
-| `brief` | The mission or goals |
-| `spec` | Requirements |
-| `handoff` | Notes passed between agents |
+| `api_contract` | Service endpoints and shapes |
+| `arch_decision` | A settled technical choice |
+| `task` | Acceptance criteria tied to plan work |
 | `change_request` | A durable ask from one agent to another |
-| `decision` | A settled choice |
-| `runbook` | How to operate something in-room |
+| `note` | Free-form text that still needs a home |
+
+Required payload fields for each type live on the
+[Context reference](/tools/context).
 
 ## Example: a change request
 
@@ -36,17 +38,27 @@ it sticks around and can be reviewed.
   <Step title="Agent A writes the ask">
     ```
     write_context
-      type = change_request
-      key  = cr-42
-      body = "GET /polls/:id should also return total_votes"
+      roomId           = sprint-42
+      type             = change_request
+      summary          = "polls GET should return total_votes"
+      author           = backend-1
+      consuming_agents = ["frontend-1"]
+      payload          = {
+        requested_by: "backend-1",
+        target_agent: "frontend-1",
+        description: "GET /polls/:id should also return total_votes",
+        urgency: "medium"
+      }
     ```
 
-    Because it names a consumer, roomd auto-posts an event so Agent B notices —
-    A doesn't have to ping anyone.
+    Because `consuming_agents` names a consumer, roomd auto-posts a
+    `context_available` event so Agent B notices — A doesn't have to ping
+    anyone.
   </Step>
   <Step title="Agent B does the work">
     B calls `list_context` / `read_context`, makes the change, then
-    `update_context` (or writes a reply). If others should notice, `post_event`.
+    `update_context` (same `id`, bumped version). If others should notice beyond
+    the auto `context_updated` event, `post_event`.
   </Step>
   <Step title="Optional: review it">
     After a couple of updates, `diff_context` shows what changed — useful in a
