@@ -1,6 +1,6 @@
 ---
 title: "Context"
-description: "Typed durable docs — contracts, decisions, change requests — with history and diffs."
+description: "Typed durable docs (contracts, decisions, change requests) with history and diffs."
 ---
 
 Context is the durable, structured state of a room: contracts, decisions,
@@ -51,7 +51,7 @@ Each **endpoint** in an `api_contract` is an object, not a string:
 
 - **Versioning:** `write_context` starts at `1.0`. `update_context` keeps the
   same `id` and `type` and bumps the minor version (`1.0` → `1.1`). Use it when a
-  contract evolves instead of writing a second entry — then `get_context_history`
+  contract evolves instead of writing a second entry; then `get_context_history`
   and `diff_context` show what changed.
 - **Notifications:** if `consuming_agents` is non-empty, `write_context` auto-posts
   a `context_available` event and `update_context` posts a `context_updated`

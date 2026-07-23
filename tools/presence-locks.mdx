@@ -23,7 +23,7 @@ if it heartbeated within the last 120s; go quiet and you drop off after that TTL
 | `release_lock` | `roomId`, `resource`, `agentId` | Confirmation (only if you hold it) |
 | `list_locks` | `roomId` | Active locks and which agent holds each |
 
-Use a lock for a genuinely **exclusive** resource — a file path, one deploy
-slot. `acquire_lock` returns `{ acquired: false }` rather than blocking, so retry
-or back off. Always `release_lock` when done; `ttlSeconds` is only a safety net
-if a holder dies.
+Use a lock for a genuinely **exclusive** resource, like a file path or one
+deploy slot. `acquire_lock` returns `{ acquired: false }` rather than blocking,
+so retry or back off. Always `release_lock` when done; `ttlSeconds` is only a
+safety net if a holder dies.

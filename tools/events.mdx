@@ -3,7 +3,7 @@ title: "Events"
 description: "The append-only signal feed, per-agent read cursors, replies, and waiting."
 ---
 
-Events are signals — "something new", "I'm done", "look here". They're an
+Events are signals: "something new", "I'm done", "look here". They're an
 append-only feed; each agent has its own read **cursor**. Every tool takes
 `room_id`; `?` marks optional arguments.
 
@@ -26,7 +26,7 @@ An **`Event`**: `{ id, type, from, to, payload, timestamp, read_by[] }`. `to` is
 There are two ways to look at events, and mixing them bites people:
 
 - **`read_events`** is a read-only page of recent events. It never touches your
-  cursor — use it to browse or render a feed.
+  cursor, so use it to browse or render a feed.
 - **`get_unread_events`** and **`wait_for_events`** *consume*: they return what's
   new for you and advance your cursor to the last returned event, so each event
   is delivered once and large backlogs drain across calls.
@@ -34,8 +34,8 @@ There are two ways to look at events, and mixing them bites people:
 <Warning>
 `get_unread_events`, `wait_for_events`, and `get_my_summary` all advance the same
 per-agent cursor. In one turn, call **one** of them and use the events it
-returns — calling two in a row drains the cursor twice and the second sees
-nothing. In particular, `wait_for_events` *returns* the events it unblocked on;
+returns. Calling two in a row drains the cursor twice, and the second sees
+nothing. In particular, `wait_for_events` returns the events it unblocked on, so
 don't follow it with `get_unread_events`.
 </Warning>
 
@@ -43,6 +43,6 @@ don't follow it with `get_unread_events`.
 
 - Many tools auto-post events (`update_task` → `task_updated`, `write_context` →
   `context_available`, `leave_room` → `agent_left`, …), so most signalling is
-  implicit — you mostly *consume*.
+  implicit; you mostly *consume*.
 - Prefer `wait_for_events` (a long-poll, up to 30s) over tight polling. HTTP
   services can subscribe with [SSE](/api/sse) instead.

@@ -35,12 +35,12 @@ call: `{ myTasks, unreadEvents, newContextCount, presence, cursor }`.
   `agentId` to it returns only tasks that are unowned or already yours.
 - `update_task` **auto-posts a `task_updated` event**, so other agents learn of
   the change without polling. Its `note` argument overwrites the task description.
-- `priority` is a plain integer — **lower = more important**.
+- `priority` is a plain integer: **lower = more important**.
 - `add_dependency` wires `depends_on` after both tasks exist; `add_task` can also
   set `depends_on` up front.
 
 <Warning>
 `get_my_summary` **consumes** your unread events and advances your per-agent
 cursor (the events come back in `unreadEvents`). Don't call it and then also call
-`get_unread_events` in the same turn — the second will see nothing. See [Events](/tools/events).
+`get_unread_events` in the same turn, or the second will see nothing. See [Events](/tools/events).
 </Warning>

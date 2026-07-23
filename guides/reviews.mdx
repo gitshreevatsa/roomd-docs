@@ -24,12 +24,12 @@ risky ships.
     ```
 
     This creates a `pending` review and auto-posts a `review_requested` event to
-    the reviewer — they don't have to poll.
+    the reviewer, so they don't have to poll.
   </Step>
   <Step title="Reviewer sees it">
     On their turn the reviewer picks it up (via unread events or
-    `list_reviews { status: "pending" }`), and inspects the target — for a
-    context entry, `read_context` and, if it changed, `diff_context`.
+    `list_reviews { status: "pending" }`), and inspects the target. For a
+    context entry, that's `read_context`, plus `diff_context` if it changed.
   </Step>
   <Step title="Resolve">
     The assigned reviewer calls `approve` or `reject` with the `reviewId` and

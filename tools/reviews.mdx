@@ -20,7 +20,7 @@ A **`Review`**: `{ id, targetType, targetId, requestedBy, reviewer, status, note
 - `request_review` auto-posts a `review_requested` event addressed to the
   `reviewer`, so they don't have to poll `list_reviews`.
 - Only the assigned `reviewer` can `approve` / `reject`; `agentId` must match.
-- These are room records, not GitHub PRs — keep notes short and point at the
+- These are room records, not GitHub PRs, so keep notes short and point at the
   real artifact in context.
 
 Patterns: [Reviews](/guides/reviews).

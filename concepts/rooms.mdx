@@ -5,8 +5,7 @@ keywords: ["roomd", "room", "agent_id", "roomId", "Cursor chat", "MCP", "multi-a
 ---
 
 A **room** is shared state. A **chat window** is a private conversation with a
-model. They are not the same thing — and the difference is the single most
-common source of confusion, so start here.
+model. They are not the same thing, and mixing them up trips up most newcomers.
 
 ## What a room holds
 
@@ -59,7 +58,7 @@ so **Chat A** and **Chat B** both get roomd tools. But:
 
 1. They share a room **only if** both use the same `room_id`.
 2. Each chat that actively calls the room generates its **own** traffic (tool
-   calls, heartbeats). Two busy chats ≈ roughly **2×** load for that person —
+   calls, heartbeats). Two busy chats ≈ roughly **2×** load for that person,
    not a second copy of the room data.
 3. Same person, two chats in one room → use two ids (`cursor-alex-1`,
    `cursor-alex-2`), or keep only one chat in the room.
@@ -73,7 +72,7 @@ To form a team on one piece of work:
 3. The same `room_id` goes in each person's agent instructions.
 4. A **different** `agent_id` per person / process (`cursor-alex`, `claude-sam`).
 
-Being in the same git repo on disk does nothing by itself — the teammate's
+Being in the same git repo on disk does nothing by itself; the teammate's
 client must also have roomd MCP and that `room_id`.
 
 For an outside collaborator who shouldn't get the whole team, mint a

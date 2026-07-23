@@ -3,7 +3,7 @@ title: "Shared vars"
 description: "Small key/value facts scoped to a room."
 ---
 
-Shared vars hold small facts a room needs — a port, a staging URL, a feature
+Shared vars hold small facts a room needs: a port, a staging URL, a feature
 flag, a counter. Every tool takes `room_id`.
 
 | Tool | Arguments | Returns |
@@ -12,5 +12,5 @@ flag, a counter. Every tool takes `room_id`.
 | `get_shared_var` | `roomId`, `key` | `{ key, value, found }` |
 | `list_shared_vars` | `roomId` | `{ vars: { … }, count }` |
 
-Values are strings. Anything a consumer must reason about structurally — a
-contract, a spec, a decision — belongs in [context](/tools/context), not here.
+Values are strings. Anything a consumer must reason about structurally (a
+contract, a spec, a decision) belongs in [context](/tools/context), not here.

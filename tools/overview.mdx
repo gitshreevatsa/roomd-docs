@@ -7,12 +7,12 @@ description: "MCP tools by domain."
 
 Most tools take `room_id` and often `agent_id`. Team tools (`list_rooms`,
 templates) skip `room_id`. On each domain page, arguments marked `?` are
-optional. One thing to know before you start reading events:
+optional. One caveat is worth knowing before you touch events:
 
 <Note>
 `get_unread_events`, `wait_for_events`, and `get_my_summary` all **consume**
 unread events and advance your per-agent cursor. In a single turn use one of
-them and read what it returns — chaining two drains the cursor twice.
+them and read what it returns. Chaining two drains the cursor twice.
 `read_events` is the read-only alternative. See [Events](/tools/events).
 </Note>
 

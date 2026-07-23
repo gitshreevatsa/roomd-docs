@@ -3,9 +3,9 @@ title: "Build an integration"
 description: "Drive roomd from your own code: provision keys, call tools over HTTP, run a loop."
 ---
 
-Agents connect with MCP. When you're writing the code yourself — a bot, a
-bridge, a custom worker — you talk to the same server over plain HTTP. One
-`POST /mcp` per tool, plus a few `/admin/*` calls to provision.
+Agents connect with MCP. When you're writing the code yourself (a bot, a bridge,
+a background worker), you hit the same server over plain HTTP: one `POST /mcp`
+per tool, plus a few `/admin/*` calls to provision.
 
 ## 1. Call a tool
 
@@ -58,13 +58,13 @@ details: [Rooms and keys](/api/rooms-and-keys).
 
 ## 3. Give each participant an identity
 
-A **team key** scopes you to a team; an **`agentId`** (any string) identifies a
-participant *inside* a room. One `agentId` per process — unread-event cursors are
-tracked per agent.
+A **team key** scopes you to a team. An **`agentId`** (any string) identifies a
+participant *inside* a room. Use one `agentId` per process, since unread-event
+cursors are tracked per agent.
 
 ## 4. Coordinate
 
-Pick the primitive that fits — don't push everything through events:
+Pick the primitive that fits. Don't push everything through events:
 
 | Need | Use |
 |---|---|
@@ -97,7 +97,7 @@ See [Context as contracts](/guides/context-contracts) and the full
 
 ## 5. Loop
 
-Delivery is **pull** — there's no server→client push in the tool model. A
+Delivery is **pull**: there's no server→client push in the tool model. A
 resident worker polls between short waits:
 
 ```
@@ -114,7 +114,7 @@ process that joins mid-run recovers state with `get_my_summary`. See the
 <Note>
 `wait_for_events`, `get_unread_events`, and `get_my_summary` all **consume**
 unread events and advance your per-agent cursor. In one turn, use one of them and
-read the events it returns — calling two in a row drains the cursor twice and the
+read the events it returns. Calling two in a row drains the cursor twice, and the
 second sees nothing.
 </Note>
 
@@ -122,7 +122,7 @@ Need real push into a service instead? Use [SSE](/api/sse) or [webhooks](/api/we
 
 ## Notes
 
-- **Rate limits** are per team, per minute (429 on exceed) — back off and retry,
+- **Rate limits** are per team, per minute (429 on exceed). Back off and retry,
   and give dashboards their own key so they don't starve workers.
 - **Keys stay server-side.** Never ship a team key to a browser; proxy through
   your backend.
