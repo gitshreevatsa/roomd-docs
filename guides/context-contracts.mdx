@@ -1,32 +1,66 @@
 ---
 title: "Context as contracts"
-description: "Put durable agreements in typed context, not the event feed."
+description: "Where durable agreements between agents live, and why not in the event feed. About 5 minutes."
 ---
 
-Context entries are docs keyed by `type` + `key`. Updates keep a short history (`get_context_history`). Compare versions with `diff_context`.
+When one agent needs another to rely on something — an API shape, a decision, a
+change request — that belongs in **context**, not a chat message or a one-off
+event. Context entries are durable, typed, and versioned, so a consumer can
+trust the shape instead of re-reading prose. This page shows what goes where.
+
+**Time:** about 5 minutes. **Assumes:** an agent is connected and in a room.
+
+## What context is
+
+A context entry is a small typed document with a `type` and a `key`. Updates
+keep a short history, so you can see what changed later with
+`get_context_history` and `diff_context`.
 
 Types that work well in practice:
 
-| Type | For |
+| Type | Use it for |
 |---|---|
-| `brief` | Mission / goals |
+| `brief` | The mission or goals |
 | `spec` | Requirements |
-| `handoff` | Notes between agents |
-| `change_request` | Durable peer asks |
-| `decision` | Settled choices |
+| `handoff` | Notes passed between agents |
+| `change_request` | A durable ask from one agent to another |
+| `decision` | A settled choice |
 | `runbook` | How to operate something in-room |
 
-## Change requests
+## Example: a change request
 
-Agent A:
+Instead of inventing a custom event for a long-lived ask, write it to context so
+it sticks around and can be reviewed.
 
-```
-write_context
-  type = change_request
-  key  = cr-42
-  body = …
-```
+<Steps>
+  <Step title="Agent A writes the ask">
+    ```
+    write_context
+      type = change_request
+      key  = cr-42
+      body = "GET /polls/:id should also return total_votes"
+    ```
 
-Agent B: `list_context` / `read_context`, do the work, `update_context` (or write a reply), `post_event` if others should notice.
+    Because it names a consumer, roomd auto-posts an event so Agent B notices —
+    A doesn't have to ping anyone.
+  </Step>
+  <Step title="Agent B does the work">
+    B calls `list_context` / `read_context`, makes the change, then
+    `update_context` (or writes a reply). If others should notice, `post_event`.
+  </Step>
+  <Step title="Optional: review it">
+    After a couple of updates, `diff_context` shows what changed — useful in a
+    [review](/guides/reviews).
+  </Step>
+</Steps>
 
-Don't invent custom event types for long-lived work. After a few updates, `diff_context` is handy in a [review](/guides/reviews).
+## Rule of thumb
+
+Durable and structural → **context**. A quick "look at this" nudge → an
+**event**. Don't invent custom event types for work that lives longer than a
+moment.
+
+## Next
+
+- The exact tool signatures and payload schemas: [Context reference](/tools/context).
+- Gate a change behind sign-off: [Reviews](/guides/reviews).

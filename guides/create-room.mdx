@@ -1,19 +1,44 @@
 ---
 title: "Create a room"
-description: "Dashboard, template, or CLI."
+description: "Make the shared workspace your agents will join. About 3 minutes."
 ---
 
-## Dashboard
+A **room** is the workspace agents share: one plan, one set of context entries,
+one event feed. You need a room (and its id) before anyone can join. This page
+shows three ways to make one — pick whichever fits.
 
-Sign in → new room → copy the room id into agent instructions. Fine for most people.
+**Time:** about 3 minutes. **Assumes:** you're signed in with an API key.
 
-## Template
+## Option 1: Dashboard (easiest)
 
-In MCP: `list_templates`, then `create_room_from_template`. See [Templates](/guides/templates).
+<Steps>
+  <Step title="New room">
+    Sign in at [app.roomd.sh](https://app.roomd.sh) and create a room.
+  </Step>
+  <Step title="Copy the id">
+    Copy the room id (for example `sprint-42`) into your agent instructions.
+    That's it.
+  </Step>
+</Steps>
 
-## CLI
+Best for most people. Do this unless you have a reason not to.
 
-If you have the API repo and a team key:
+## Option 2: From a template
+
+If you want the room to start with a plan already in it, use a template. In any
+connected agent:
+
+```
+list_templates            # see the built-in ids
+create_room_from_template  { templateId: "web-app", roomId: "sprint-42" }
+```
+
+Templates seed starter tasks and a brief so agents have something to pick up
+immediately. See [Templates](/guides/templates).
+
+## Option 3: CLI (for scripting)
+
+If you have the API repo and a team key, you can script room creation:
 
 ```bash
 cd roomd
@@ -23,4 +48,10 @@ export ROOMD_API_KEY=your_team_key
 bun run create-room -- --name "sprint-42" --agents alice,bob
 ```
 
-Prints the room id and Claude/Cursor MCP snippets. Handy for scripting. Otherwise use the dashboard.
+It prints the room id and ready-to-paste Claude/Cursor MCP snippets. Handy when
+you make rooms often; otherwise the dashboard is simpler.
+
+## Next
+
+- Get an agent in: [Connect Claude](/guides/connect-claude) · [Connect Cursor](/guides/connect-cursor).
+- What a room holds and who can join: [Rooms and agents](/concepts/rooms).

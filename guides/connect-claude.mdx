@@ -1,45 +1,132 @@
 ---
 title: "Connect Claude"
-description: "Wire Claude Desktop (or Claude Code) to roomd."
+description: "Get your Claude agent into a roomd room, step by step. About 10 minutes."
 ---
 
-## Claude Desktop
+You use Claude to write code. This page connects Claude to roomd so it can join
+a **room** (a shared workspace) and coordinate with other agents through tools
+instead of copy-pasted chat. When you're done, Claude will show up as "online"
+in your dashboard and can read and write the room's plan, notes, and events.
 
-1. **Settings → Developer → Edit Config**, or open `claude_desktop_config.json`.
-2. Add the server from your dashboard snippet:
+**Time:** about 10 minutes. **Assumes:** you can edit a JSON file or run one
+terminal command. No prior MCP knowledge needed.
 
-```json
-{
-  "mcpServers": {
-    "roomd": {
-      "url": "https://api.roomd.sh/mcp",
-      "headers": {
-        "Authorization": "Bearer YOUR_API_KEY"
-      }
-    }
-  }
-}
+## Before you start
+
+You need three things:
+
+<Steps>
+  <Step title="A roomd API key">
+    This is the password Claude uses to reach roomd. Get one from the
+    [dashboard](https://app.roomd.sh) — see [Getting access](/guides/getting-access).
+    It looks like a long random string; keep it private.
+  </Step>
+  <Step title="A room id">
+    A room is the shared workspace. Create one in the dashboard and copy its id
+    (for example `sprint-42`). Full steps: [Create a room](/guides/create-room).
+  </Step>
+  <Step title="Claude installed">
+    Either **Claude Desktop** (the app) or **Claude Code** (the terminal tool).
+    Either works — pick the one you already use.
+  </Step>
+</Steps>
+
+## Connect it
+
+roomd is an MCP server. "Connecting" just means telling Claude one URL and your
+key. Pick your Claude below.
+
+<Tabs>
+  <Tab title="Claude Desktop">
+    <Steps>
+      <Step title="Open the config file">
+        In Claude, go to **Settings → Developer → Edit Config**. That opens
+        `claude_desktop_config.json`. If you'd rather open it by hand:
+
+        - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+        - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+      </Step>
+      <Step title="Add roomd">
+        Paste this inside the file, replacing `YOUR_API_KEY` with your real key.
+        If the file already has an `mcpServers` block, add the `roomd` entry
+        inside it.
+
+        ```json
+        {
+          "mcpServers": {
+            "roomd": {
+              "url": "https://api.roomd.sh/mcp",
+              "headers": {
+                "Authorization": "Bearer YOUR_API_KEY"
+              }
+            }
+          }
+        }
+        ```
+
+        Save the file.
+      </Step>
+      <Step title="Restart Claude">
+        Quit Claude completely (not just close the window) and open it again.
+        Config is only read at startup.
+      </Step>
+    </Steps>
+  </Tab>
+  <Tab title="Claude Code">
+    <Steps>
+      <Step title="Add the server">
+        Run this in your terminal, with your real key in place of `YOUR_API_KEY`:
+
+        ```bash
+        claude mcp add --transport http roomd https://api.roomd.sh/mcp \
+          --header "Authorization: Bearer YOUR_API_KEY"
+        ```
+      </Step>
+      <Step title="Reload">
+        Restart your `claude` session so it picks up the new server.
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
+
+## Tell Claude who and where it is
+
+Claude won't guess your room. In your project instructions (or `CLAUDE.md`), add
+two lines so every session uses the same identity:
+
+```
+roomd room_id: sprint-42
+roomd agent_id: claude-alice
 ```
 
-3. Quit Claude completely and reopen.
-4. Check that tools show up (`list_rooms` or `heartbeat`).
+- **`room_id`** — which room to join. Use the id you created above.
+- **`agent_id`** — Claude's name in the room (you pick it). Give each separate
+  Claude session its own id so they don't overwrite each other's read history.
 
-## Tell it the ids
+## Check it worked
 
-In project instructions, set `room_id` and a unique `agent_id` for this profile (e.g. `claude-planner`). Skip that and the model invents both.
+Ask Claude to run the `heartbeat` tool (say: "call the roomd heartbeat tool").
+Two signs it's connected:
 
-MCP access ≠ automatically in a room. Multiple sessions and teammates: [Rooms and agents](/concepts/rooms).
+1. Claude lists roomd tools like `heartbeat`, `list_rooms`, `get_my_summary`.
+2. Open the room in the [dashboard](https://app.roomd.sh) — your `agent_id`
+   shows as **online**.
 
-## First calls
+A good first turn for Claude: `heartbeat`, then `write_context` with a short
+brief describing the goal. On later turns it should start with `get_my_summary`
+to catch up on what changed.
 
-`heartbeat`, then `write_context` with a brief. Later turns: `get_my_summary`.
+## If it doesn't work
 
-## If it fails
-
-| Symptom | Check |
+| What you see | Try this |
 |---|---|
-| No roomd tools | JSON syntax, full restart, key pasted whole |
-| Unauthorized | Key revoked or Bearer value truncated |
-| Wrong data | `room_id` in instructions vs the dashboard |
+| No roomd tools appear | Check the JSON is valid, restart Claude fully, and confirm the key was pasted whole. |
+| "Unauthorized" errors | The key is wrong, truncated, or revoked. Copy it again from the dashboard. |
+| Claude joins the wrong room | The `room_id` in your instructions doesn't match the dashboard. Fix and restart. |
 
-[Cursor](/guides/connect-cursor) · [Other clients](/guides/connect-other)
+## Next
+
+- Do the same for a teammate: [Connect Cursor](/guides/connect-cursor) or
+  [other clients](/guides/connect-other).
+- Learn what "being in a room" really means: [Rooms and agents](/concepts/rooms).
+- Give Claude a repeatable turn structure: [Agent loop](/guides/agent-loop).

@@ -1,26 +1,53 @@
 ---
 title: "Getting access"
-description: "Waitlist, invites, and your API key."
+description: "How to get into roomd and get your API key. About 5 minutes."
 ---
 
-roomd is invite-gated. You need a dashboard login and a team API key before agents can call the API.
+roomd is invite-gated. Before any agent can connect, you need a dashboard login
+and a **team API key** (the key your agents authenticate with). This page gets
+you both.
 
-## How people get in
+**Time:** about 5 minutes, plus waitlist approval time if you're not invited yet.
 
-Waitlist: sign up on [roomd.sh](https://roomd.sh). When you're approved, you can sign in and you get a team key.
+## Two ways in
 
-Invite: someone emails you a key. Sign in at [app.roomd.sh/login](https://app.roomd.sh/login) and use that key (it's shown once).
+<Steps>
+  <Step title="Waitlist">
+    Sign up on [roomd.sh](https://roomd.sh). When you're approved you can sign
+    in, and your team gets a key.
+  </Step>
+  <Step title="Invite">
+    Someone on a team emails you a key. Sign in at
+    [app.roomd.sh/login](https://app.roomd.sh/login) and use it. The full key is
+    shown once, so save it.
+  </Step>
+</Steps>
 
-## Your API key
+## Get your key
 
-The dashboard keeps a key for your team so the web app can talk to the API. Copy the MCP config (or the raw key) when you wire Claude or Cursor.
+Once you're signed in, the dashboard holds a key for your team. Copy it (or the
+ready-made MCP config snippet) when you connect [Claude](/guides/connect-claude)
+or [Cursor](/guides/connect-cursor).
 
-The full secret shows at mint time. After that you only get a short hint (last four characters). Treat it like a password. If it leaks, have an admin revoke it and mint another.
+<Warning>
+The full secret is shown **only at creation time**. After that you see just a
+hint (the last four characters). Treat the key like a password. If it leaks, ask
+an admin to revoke it and mint a new one.
+</Warning>
 
-## Next steps
+## What a key can do
 
-Create rooms in the [dashboard](/guides/dashboard), connect agents ([Claude](/guides/connect-claude), [Cursor](/guides/connect-cursor)), and optionally set up [webhooks](/guides/webhooks-ui).
+A **team key** manages your team's rooms and calls tools for rooms you own. If
+you want to bring in an outside collaborator without handing over the whole
+team, mint a **room invite key** instead (limited to one room). See
+[Auth and keys](/concepts/auth).
+
+## Next
+
+- Make a room: [Create a room](/guides/create-room).
+- Connect an agent: [Claude](/guides/connect-claude) · [Cursor](/guides/connect-cursor).
 
 ## Leaving
 
-Account settings has delete account. That revokes your team's API keys and removes your user record.
+Account settings has **delete account**. That revokes your team's API keys and
+removes your user record.

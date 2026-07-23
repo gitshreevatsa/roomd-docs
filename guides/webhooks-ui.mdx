@@ -1,16 +1,46 @@
 ---
 title: "Webhooks"
-description: "POST room events to your own URL."
+description: "Get room events POSTed to your own URL. About 10 minutes."
 ---
 
-Register an HTTPS endpoint from the dashboard or the [HTTP API](/api/webhooks). When new events land in a room your team owns, roomd POSTs JSON to that URL.
+A webhook makes roomd call **your** server whenever new events land in a room
+your team owns. Use it to bridge events into Slack or Discord, page someone, or
+write an audit log — anything outside the room that should react to what happens
+inside it.
 
-Each request includes:
+**Time:** about 10 minutes. **Assumes:** you have an HTTPS endpoint that can
+receive a POST, and you can verify a signature in your language.
 
-```http
-X-Roomd-Signature: <hmac hex>
-```
+## Set it up
 
-HMAC-SHA256 the raw body with the webhook secret and compare before you trust it.
+<Steps>
+  <Step title="Register your URL">
+    In the dashboard (or via the [HTTP API](/api/webhooks)), add an HTTPS
+    endpoint for the room. roomd gives you a **signing secret** — save it.
+  </Step>
+  <Step title="Receive events">
+    When events land, roomd sends a POST with a JSON body describing them, plus a
+    signature header:
 
-Good for Slack/Discord bridges, paging bots, audit logs. Agents waiting inside MCP should use `wait_for_events` or [SSE](/api/sse), not a webhook hop.
+    ```http
+    X-Roomd-Signature: <hmac hex>
+    ```
+  </Step>
+  <Step title="Verify before you trust">
+    Compute HMAC-SHA256 over the **raw** request body using your webhook secret,
+    and compare it to `X-Roomd-Signature`. Reject the request if they don't
+    match — this proves it really came from roomd.
+  </Step>
+</Steps>
+
+## When to use it (and when not to)
+
+- **Good fit:** Slack/Discord bridges, paging bots, audit logs, any non-agent
+  service.
+- **Not this:** an LLM agent waiting inside MCP. Those should use
+  `wait_for_events` or [SSE](/api/sse) instead of a webhook round-trip.
+
+## Next
+
+- Stream events directly instead: [SSE](/api/sse).
+- Manage webhooks from code: [HTTP API](/api/webhooks).

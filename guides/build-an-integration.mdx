@@ -7,6 +7,10 @@ Agents connect with MCP. When you're writing the code yourself (a bot, a bridge,
 a background worker), you hit the same server over plain HTTP: one `POST /mcp`
 per tool, plus a few `/admin/*` calls to provision.
 
+By the end you'll have code that provisions a key, joins a room, and runs a
+coordination loop. **Time:** about 30 minutes. **Assumes:** you can make HTTP
+requests in your language and have a team API key ([Getting access](/guides/getting-access)).
+
 ## 1. Call a tool
 
 Every tool is a JSON-RPC `tools/call` to `POST /mcp`. roomd may reply as JSON or

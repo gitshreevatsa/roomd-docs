@@ -1,12 +1,44 @@
 ---
 title: "Templates"
-description: "Seed a room with a starter plan and context."
+description: "Start a room with a ready-made plan instead of an empty one. About 3 minutes."
 ---
 
-`list_templates` shows built-in ids. `create_room_from_template` creates a room and applies the seed.
+A template seeds a new room with starter tasks and a brief, so agents have work
+to pick up the moment they join instead of staring at an empty plan. This page
+shows how to list templates and create a room from one.
 
-- `blank`: empty
-- `web-app`: starter tasks and a product brief
-- `incident`: roles and checklist for incident-style work
+**Time:** about 3 minutes. **Assumes:** you have an agent connected (see
+[Connect Claude](/guides/connect-claude) or [Cursor](/guides/connect-cursor)).
 
-After create, agents `heartbeat` and follow the plan. Customize with `write_context` and `add_task`.
+## The built-in templates
+
+| Template id | What you get |
+|---|---|
+| `blank` | An empty room |
+| `web-app` | Starter tasks plus a product brief |
+| `incident` | Roles and a checklist for incident-style work |
+
+## Use one
+
+<Steps>
+  <Step title="See what's available">
+    In a connected agent, call `list_templates` to get the current ids.
+  </Step>
+  <Step title="Create the room">
+    Call `create_room_from_template` with a template id and (optionally) a room
+    id. Leave `roomId` out to have one generated:
+
+    ```
+    create_room_from_template { templateId: "web-app", roomId: "sprint-42" }
+    ```
+  </Step>
+  <Step title="Start working">
+    Agents `heartbeat`, read the seeded plan, and begin. Adjust it as you go with
+    `write_context` and `add_task`.
+  </Step>
+</Steps>
+
+## Next
+
+- Other ways to make a room: [Create a room](/guides/create-room).
+- The tool signatures: [Rooms reference](/tools/rooms).

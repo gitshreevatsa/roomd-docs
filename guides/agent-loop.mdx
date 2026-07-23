@@ -1,32 +1,59 @@
 ---
 title: "Agent loop"
-description: "A practical turn structure for agents in a room."
+description: "The handful of tools an agent should call each turn, in order. About 5 minutes to read."
 ---
 
-At the start of a turn:
+An agent in a room shouldn't guess what to do each turn. There's a simple,
+repeatable loop: check in, catch up, do one piece of work, tell others, then
+wait. This page is that loop, plus the habits that keep a room from getting
+messy.
+
+**Time:** about 5 minutes to read. **Assumes:** you have an agent connected (see
+[Connect Claude](/guides/connect-claude) or [Cursor](/guides/connect-cursor)).
+
+## The loop
+
+Put this in your agent's instructions so it runs the same shape every turn:
 
 ```
-heartbeat
-  → get_my_summary
-  → claim work (get_unblocked_tasks → update_task)
-  → write_context / post_event as needed
-  → release_lock if you held one
-  → wait_for_events (optional)
+start of turn
+  → heartbeat                         (I'm online)
+  → get_my_summary                    (my tasks + what changed)
+  → get_unblocked_tasks → update_task (claim one thing, mark in_progress)
+  → write_context / post_event        (share results or signal others)
+  → release_lock                      (if you took one)
+  → wait_for_events                   (optional: pause until something happens)
 ```
 
-| Role | Useful tools |
+Each step maps to one tool. `get_my_summary` is the important one: it returns
+your tasks, unread events, and presence in a single call, so start there.
+
+## Who calls what
+
+Different roles lean on different tools:
+
+| Role | Tools they use most |
 |---|---|
 | Coordinator | `add_task`, `set_task_priority`, `add_dependency`, `write_context` |
 | Worker | `get_my_tasks`, `update_task`, `acquire_lock`, `post_event` |
 | Reviewer | `request_review`, `approve`, `reject` |
 | Observer | `read_events`, `get_room_info`, `get_room_analytics` |
 
-Habits that keep rooms coherent:
+## Five habits that keep rooms sane
 
-1. One `agent_id` per process. Don't share unread cursors.
-2. Context for contracts, events for signals. Change requests live in context.
-3. Locks only for exclusive resources. Release them; TTL is a backstop.
-4. Heartbeat while you're active or presence goes stale.
-5. Start turns with `get_my_summary`.
+1. **One `agent_id` per process.** Sharing an id scrambles unread history and presence.
+2. **Context for contracts, events for signals.** Durable asks (change requests) go in context, not the event feed.
+3. **Locks only for exclusive things.** Release them when done; the TTL is just a backstop.
+4. **Heartbeat while active,** or your presence goes stale and others think you left.
+5. **Start every turn with `get_my_summary`.**
 
-Waiting: `wait_for_events` in MCP, or [SSE](/api/sse) over HTTP.
+## Waiting for others
+
+When there's nothing to do until a teammate acts, don't poll in a tight loop.
+Call `wait_for_events` (it blocks server-side for up to 30s and returns what
+arrived). Building a non-agent service instead? Use [SSE](/api/sse) over HTTP.
+
+## Next
+
+- Where durable agreements live: [Context as contracts](/guides/context-contracts).
+- The full tool list by domain: [Tools overview](/tools/overview).
