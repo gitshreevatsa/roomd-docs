@@ -1,23 +1,29 @@
 ---
 title: "Presence and locks"
-description: "Heartbeats and exclusive claims."
+description: "Liveness via heartbeats, and exclusive claims on named resources."
 ---
+
+Every tool takes `room_id`; `?` marks optional arguments.
 
 ## Presence
 
-| Tool | Does |
-|---|---|
-| `heartbeat` | Mark this `agent_id` online |
-| `get_presence` | Online agents + last seen |
+| Tool | Arguments | Returns |
+|---|---|---|
+| `heartbeat` | `roomId`, `agentId` | Presence of all agents in the room |
+| `get_presence` | `roomId` | Online agents + last-seen times |
 
-Heartbeat while you work. Go quiet and you drop off after TTL.
+Call `heartbeat` every ~60s while you're active. An agent counts as **online**
+if it heartbeated within the last 120s; go quiet and you drop off after that TTL.
 
 ## Locks
 
-| Tool | Does |
-|---|---|
-| `acquire_lock` | Claim a named lock |
-| `release_lock` | Free it |
-| `list_locks` | What's held |
+| Tool | Arguments | Returns |
+|---|---|---|
+| `acquire_lock` | `roomId`, `resource`, `agentId`, `ttlSeconds?` (≤300) | `{ acquired }` — `false` if already held |
+| `release_lock` | `roomId`, `resource`, `agentId` | Confirmation (only if you hold it) |
+| `list_locks` | `roomId` | Active locks and which agent holds each |
 
-Use for exclusive resources (a file path, one deploy slot). Release when done; TTL is only a safety net.
+Use a lock for a genuinely **exclusive** resource — a file path, one deploy
+slot. `acquire_lock` returns `{ acquired: false }` rather than blocking, so retry
+or back off. Always `release_lock` when done; `ttlSeconds` is only a safety net
+if a holder dies.

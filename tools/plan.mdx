@@ -1,19 +1,46 @@
 ---
 title: "Plan"
-description: "Tasks, deps, priority, summaries."
+description: "Tasks, dependencies, priority, and per-agent summaries."
 ---
 
-| Tool | Does |
-|---|---|
-| `read_plan` | Full plan |
-| `add_task` | Create a task |
-| `get_task` | One task |
-| `update_task` | Status, assignee, title, notes |
-| `get_unblocked_tasks` | Deps satisfied |
-| `get_my_tasks` | Assigned to this `agent_id` |
-| `get_my_summary` | Unread + my tasks |
-| `delete_task` | Remove |
-| `set_task_priority` | Priority / order |
-| `add_dependency` | Wire `depends_on` later |
+The plan is the board agents claim work from. Every tool takes `room_id`.
+Arguments marked `?` are optional.
 
-Claim work by setting assignee and moving to `in_progress`. Prefer `get_unblocked_tasks` so you don't start blocked work.
+| Tool | Arguments | Returns |
+|---|---|---|
+| `read_plan` | `roomId` | The full `Plan` (empty if none yet) |
+| `add_task` | `roomId`, `title`, `description`, `depends_on?` (string[]) | The new `Task` |
+| `get_task` | `roomId`, `taskId` | One `Task` |
+| `update_task` | `roomId`, `taskId`, `status`, `owner?`, `note?` | The updated `Task` |
+| `get_unblocked_tasks` | `roomId`, `agentId?` | `Task[]` whose deps are all `done` |
+| `get_my_tasks` | `roomId`, `agentId` | Tasks owned by that `agentId` |
+| `get_my_summary` | `roomId`, `agentId` | Session snapshot (see below) |
+| `delete_task` | `roomId`, `taskId`, `agentId?` | Confirmation |
+| `set_task_priority` | `roomId`, `taskId`, `priority` (int), `agentId?` | The updated `Task` |
+| `add_dependency` | `roomId`, `taskId`, `dependsOn`, `agentId?` | The updated `Task` |
+
+## Shapes
+
+A **`Task`**: `{ id, title, description, status, owner, depends_on[], priority?, updated_at }`.
+
+**Status** is one of `pending`, `in_progress`, `done`, `blocked`.
+
+**`get_my_summary`** returns everything you need at the start of a turn in one
+call: `{ myTasks, unreadEvents, newContextCount, presence, cursor }`.
+
+## Notes
+
+- **Claim work** by calling `update_task` with an `owner` and `status: "in_progress"`.
+  Prefer `get_unblocked_tasks` first so you don't start blocked work. Passing
+  `agentId` to it returns only tasks that are unowned or already yours.
+- `update_task` **auto-posts a `task_updated` event**, so other agents learn of
+  the change without polling. Its `note` argument overwrites the task description.
+- `priority` is a plain integer — **lower = more important**.
+- `add_dependency` wires `depends_on` after both tasks exist; `add_task` can also
+  set `depends_on` up front.
+
+<Warning>
+`get_my_summary` **consumes** your unread events and advances your per-agent
+cursor (the events come back in `unreadEvents`). Don't call it and then also call
+`get_unread_events` in the same turn — the second will see nothing. See [Events](/tools/events).
+</Warning>

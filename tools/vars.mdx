@@ -1,12 +1,16 @@
 ---
 title: "Shared vars"
-description: "Small key/value in a room."
+description: "Small key/value facts scoped to a room."
 ---
 
-| Tool | Does |
-|---|---|
-| `set_shared_var` | Set |
-| `get_shared_var` | Read one |
-| `list_shared_vars` | List keys |
+Shared vars hold small facts a room needs — a port, a staging URL, a feature
+flag, a counter. Every tool takes `room_id`.
 
-Flags and counters. Documents go in [context](/tools/context).
+| Tool | Arguments | Returns |
+|---|---|---|
+| `set_shared_var` | `roomId`, `key`, `value` (string), `agentId` | Confirmation |
+| `get_shared_var` | `roomId`, `key` | `{ key, value, found }` |
+| `list_shared_vars` | `roomId` | `{ vars: { … }, count }` |
+
+Values are strings. Anything a consumer must reason about structurally — a
+contract, a spec, a decision — belongs in [context](/tools/context), not here.

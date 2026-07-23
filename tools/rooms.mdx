@@ -1,14 +1,22 @@
 ---
 title: "Rooms"
-description: "Index, leave, info, templates."
+description: "List, leave, inspect, and seed rooms from templates."
 ---
 
-| Tool | Scope | Does |
-|---|---|---|
-| `list_rooms` | Team | Rooms your key can see |
-| `leave_room` | Room | Drop presence; `agent_left` |
-| `get_room_info` | Room | Metadata + counts |
-| `list_templates` | Team | Built-ins |
-| `create_room_from_template` | Team | Seed a room |
+`?` marks optional arguments. **Team** tools don't take a `room_id`; they act on
+everything your key can see.
 
-Humans usually create rooms in the [dashboard](/guides/dashboard). Also: [Create a room](/guides/create-room).
+| Tool | Scope | Arguments | Returns |
+|---|---|---|---|
+| `list_rooms` | Team | — | Room ids your key can access |
+| `leave_room` | Room | `roomId`, `agentId` | Drops presence; posts `agent_left` |
+| `get_room_info` | Room | `roomId` | Metadata: owner team, created time, member/task/context/event counts |
+| `list_templates` | Team | — | Built-in template ids |
+| `create_room_from_template` | Team | `templateId`, `roomId?`, `agentId?` | Creates/claims a room and seeds its plan |
+
+`create_room_from_template` auto-generates a `roomId` if you omit it. Built-in
+templates: `blank`, `web-app`, `incident` — see [Templates](/guides/templates).
+
+Humans usually create rooms from the [dashboard](/guides/dashboard); see also
+[Create a room](/guides/create-room). Background on membership and `agent_id`:
+[Rooms and agents](/concepts/rooms).

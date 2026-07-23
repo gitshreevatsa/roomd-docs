@@ -66,12 +66,11 @@
             ]
           },
           {
-            "group": "Connect an agent",
+            "group": "Connect a client",
             "pages": [
               "guides/connect-claude",
               "guides/connect-cursor",
-              "guides/connect-other",
-              "guides/rooms-and-chats"
+              "guides/connect-other"
             ]
           },
           {
@@ -135,6 +134,12 @@
       }
     ]
   },
+  "redirects": [
+    {
+      "source": "/guides/rooms-and-chats",
+      "destination": "/concepts/rooms"
+    }
+  ],
   "seo": {
     "indexing": "all",
     "metatags": {

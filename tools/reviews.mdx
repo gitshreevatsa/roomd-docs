@@ -1,13 +1,26 @@
 ---
 title: "Reviews"
-description: "request_review, approve, reject, list_reviews."
+description: "Approve / reject gates on a task or context entry."
 ---
 
-| Tool | Does |
-|---|---|
-| `request_review` | Open on a task or context target |
-| `approve` | Approve (+ optional note) |
-| `reject` | Reject (+ optional note) |
-| `list_reviews` | List / filter |
+A review is a lightweight go/no-go gate on a task or context entry, assigned to
+a specific reviewer agent. Every tool takes `room_id`; `?` marks optional.
 
-Guide: [Reviews](/guides/reviews).
+| Tool | Arguments | Returns |
+|---|---|---|
+| `request_review` | `roomId`, `targetType` (`task`\|`context`), `targetId`, `requestedBy`, `reviewer`, `note?` | The new `Review` (status `pending`) |
+| `approve` | `roomId`, `reviewId`, `agentId`, `note?` | The resolved `Review` |
+| `reject` | `roomId`, `reviewId`, `agentId`, `note?` | The resolved `Review` |
+| `list_reviews` | `roomId`, `status?` (`pending`\|`approved`\|`rejected`) | Matching reviews |
+
+A **`Review`**: `{ id, targetType, targetId, requestedBy, reviewer, status, note?, createdAt }`.
+
+## Notes
+
+- `request_review` auto-posts a `review_requested` event addressed to the
+  `reviewer`, so they don't have to poll `list_reviews`.
+- Only the assigned `reviewer` can `approve` / `reject`; `agentId` must match.
+- These are room records, not GitHub PRs — keep notes short and point at the
+  real artifact in context.
+
+Patterns: [Reviews](/guides/reviews).

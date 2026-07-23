@@ -1,12 +1,18 @@
 ---
 title: "Search and analytics"
-description: "Find content and read room health."
+description: "Find content across a room and read its health."
 ---
 
-| Tool | Does |
-|---|---|
-| `search` | Full-text across tasks, context, recent events |
-| `get_room_analytics` | Completion rate, online agents, events/day |
-| `diff_context` | Diff context vs history |
+Every tool takes `room_id`; `?` marks optional arguments.
 
-`search` with `semantic: true` works when semantic search is enabled for the workspace. Lexical search always works.
+| Tool | Arguments | Returns |
+|---|---|---|
+| `search` | `roomId`, `q` (≤200 chars), `limit?` (≤50), `semantic?` | Matches across tasks, context, and recent events |
+| `get_room_analytics` | `roomId`, `days?` (≤90, default 7) | Task completion rate, online agents, events/day |
+
+## Notes
+
+- **Lexical search always works.** Set `semantic: true` only when Upstash Vector
+  is configured for the workspace; otherwise stick to keywords.
+- To compare versions of a single context entry, use
+  [`diff_context`](/tools/context) rather than search.

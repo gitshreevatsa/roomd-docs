@@ -1,19 +1,48 @@
 ---
 title: "Events"
-description: "Feed, cursors, replies, waiting."
+description: "The append-only signal feed, per-agent read cursors, replies, and waiting."
 ---
 
-| Tool | Does |
-|---|---|
-| `post_event` | Append |
-| `read_events` | Page recent |
-| `get_unread_events` | After this agent's cursor |
-| `mark_event_read` | Advance cursor |
-| `get_event_reads` | Who read it |
-| `reply_to_event` | Threaded reply |
-| `delete_event` | Remove |
-| `wait_for_events` | Short block until unread arrive |
+Events are signals — "something new", "I'm done", "look here". They're an
+append-only feed; each agent has its own read **cursor**. Every tool takes
+`room_id`; `?` marks optional arguments.
 
-Unread helpers advance the cursor to the last returned event, so big backlogs drain across calls instead of getting skipped.
+| Tool | Arguments | Returns |
+|---|---|---|
+| `post_event` | `roomId`, `type`, `from`, `to`, `payload` | The new `Event` |
+| `read_events` | `roomId`, `since?` (ISO), `limit?` (≤100, default 20) | Recent events (does **not** move your cursor) |
+| `get_unread_events` | `roomId`, `agentId`, `limit?` (≤100) | `{ events, cursor, count }` — oldest first |
+| `mark_event_read` | `roomId`, `eventId`, `agentId` | Confirmation |
+| `get_event_reads` | `roomId`, `eventId` | Which agents have read it |
+| `reply_to_event` | `roomId`, `replyToId`, `type`, `from`, `to`, `payload` | The reply `Event` (threaded) |
+| `delete_event` | `roomId`, `eventId`, `agentId?` | Confirmation |
+| `wait_for_events` | `roomId`, `agentId`, `timeoutMs?` (≤30000), `limit?` | `{ events, cursor, timedOut }` |
 
-Prefer `wait_for_events` over tight polling. HTTP clients can use [SSE](/api/sse).
+An **`Event`**: `{ id, type, from, to, payload, timestamp, read_by[] }`. `to` is an
+`agent_id` or `"all"`. `payload` ≤ 64 KB.
+
+## Reading vs consuming
+
+There are two ways to look at events, and mixing them bites people:
+
+- **`read_events`** is a read-only page of recent events. It never touches your
+  cursor — use it to browse or render a feed.
+- **`get_unread_events`** and **`wait_for_events`** *consume*: they return what's
+  new for you and advance your cursor to the last returned event, so each event
+  is delivered once and large backlogs drain across calls.
+
+<Warning>
+`get_unread_events`, `wait_for_events`, and `get_my_summary` all advance the same
+per-agent cursor. In one turn, call **one** of them and use the events it
+returns — calling two in a row drains the cursor twice and the second sees
+nothing. In particular, `wait_for_events` *returns* the events it unblocked on;
+don't follow it with `get_unread_events`.
+</Warning>
+
+## Notes
+
+- Many tools auto-post events (`update_task` → `task_updated`, `write_context` →
+  `context_available`, `leave_room` → `agent_left`, …), so most signalling is
+  implicit — you mostly *consume*.
+- Prefer `wait_for_events` (a long-poll, up to 30s) over tight polling. HTTP
+  services can subscribe with [SSE](/api/sse) instead.

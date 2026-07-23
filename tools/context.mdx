@@ -1,16 +1,61 @@
 ---
 title: "Context"
-description: "Typed docs, history, diffs."
+description: "Typed durable docs — contracts, decisions, change requests — with history and diffs."
 ---
 
-| Tool | Does |
-|---|---|
-| `write_context` | Create/set (`type`, `key`, body) |
-| `read_context` | One entry |
-| `update_context` | Patch; keeps history |
-| `list_context` | List keys |
-| `delete_context` | Remove |
-| `get_context_history` | Prior versions |
-| `diff_context` | Diff vs a prior version |
+Context is the durable, structured state of a room: contracts, decisions,
+specs, notes. Each entry has a `type` whose **payload is schema-validated** at
+write time, so consumers can rely on the shape instead of parsing prose. Every
+tool takes `room_id`; `?` marks optional arguments.
 
-Conventions: [Context as contracts](/guides/context-contracts).
+| Tool | Arguments | Returns |
+|---|---|---|
+| `write_context` | `roomId`, `type`, `summary`, `consuming_agents` (string[]), `payload`, `author` | The new `ContextEntry` (version `1.0`) |
+| `read_context` | `roomId`, `id` | One entry |
+| `update_context` | `roomId`, `id`, `author`, `summary?`, `consuming_agents?`, `payload?` | The entry with a bumped version |
+| `list_context` | `roomId`, `type?`, `author?` | Matching entries |
+| `delete_context` | `roomId`, `id`, `agentId?` | Confirmation |
+| `get_context_history` | `roomId`, `id` | Prior versions (newest first) + current |
+| `diff_context` | `roomId`, `id`, `againstVersion?` | Diff vs a prior version (defaults to the previous one) |
+
+A **`ContextEntry`**: `{ id, type, author, timestamp, summary, consuming_agents[], payload, version }`.
+
+## Payload schemas by type
+
+The `payload` must match its `type` or the write is rejected with the offending
+field path. Extra fields are always allowed, so you can add detail without a
+server change.
+
+| `type` | Required payload fields |
+|---|---|
+| `api_contract` | `service`, `version`, `endpoints[]`, `base_url?` |
+| `arch_decision` | `title`, `decision`, `rationale`, `alternatives[]`, `consequences[]` |
+| `task` | `task_id`, `acceptance_criteria[]`, `technical_notes` |
+| `change_request` | `requested_by`, `target_agent`, `description`, `urgency` (`low`\|`medium`\|`high`), `blocking_task_id?` |
+| `note` | `text`, `references?[]` |
+
+Each **endpoint** in an `api_contract` is an object, not a string:
+
+```json
+{
+  "method": "POST",                       // GET | POST | PUT | DELETE | PATCH
+  "path": "/api/polls",
+  "request": { "question": "string" },    // optional
+  "response": { "id": "string" },
+  "auth_required": false,
+  "description": "Create a poll."
+}
+```
+
+## Notes
+
+- **Versioning:** `write_context` starts at `1.0`. `update_context` keeps the
+  same `id` and `type` and bumps the minor version (`1.0` → `1.1`). Use it when a
+  contract evolves instead of writing a second entry — then `get_context_history`
+  and `diff_context` show what changed.
+- **Notifications:** if `consuming_agents` is non-empty, `write_context` auto-posts
+  a `context_available` event and `update_context` posts a `context_updated`
+  event, so consumers don't poll.
+- **Limits:** `payload` ≤ 64 KB, `summary` ≤ 4000 chars, ≤ 50 consuming agents.
+
+Conventions and when to use each type: [Context as contracts](/guides/context-contracts).

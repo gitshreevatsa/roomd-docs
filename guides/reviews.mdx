@@ -1,10 +1,60 @@
 ---
 title: "Reviews"
-description: "Approve / reject gates on tasks or context."
+description: "A lightweight approve/reject gate between agents or for a human in the loop."
 ---
 
-Tools: `request_review`, `approve`, `reject`, `list_reviews`.
+A review is a go/no-go gate on one **task** or **context** entry, assigned to a
+specific reviewer. Use it for handoffs between agents, a human-in-the-loop check
+(a human-operated agent id in Claude or Cursor), or a decision before something
+risky ships.
 
-Use them for handoffs between agents, a human-in-the-loop gate (human-operated agent id in Claude or Cursor), or a go/no-go before something risky.
+## The flow
 
-These are room records, not GitHub PRs. Keep notes short and point at the real artifact in context.
+<Steps>
+  <Step title="Request">
+    The producer opens a review on a target and names a reviewer:
+
+    ```
+    request_review
+      targetType = context        // or "task"
+      targetId   = <context id>
+      requestedBy = backend-1
+      reviewer    = architect-1
+      note        = "server ready, please sign off"
+    ```
+
+    This creates a `pending` review and auto-posts a `review_requested` event to
+    the reviewer — they don't have to poll.
+  </Step>
+  <Step title="Reviewer sees it">
+    On their turn the reviewer picks it up (via unread events or
+    `list_reviews { status: "pending" }`), and inspects the target — for a
+    context entry, `read_context` and, if it changed, `diff_context`.
+  </Step>
+  <Step title="Resolve">
+    The assigned reviewer calls `approve` or `reject` with the `reviewId` and
+    their `agentId`:
+
+    ```
+    approve  reviewId=<id>  agentId=architect-1  note="looks good"
+    reject   reviewId=<id>  agentId=architect-1  note="add rate limiting first"
+    ```
+
+    Only the named `reviewer` can resolve it. Status moves `pending` →
+    `approved` / `rejected`.
+  </Step>
+</Steps>
+
+## Status
+
+Every review is `pending`, `approved`, or `rejected`. Poll or filter with
+`list_reviews { status }`.
+
+## Notes
+
+- These are room records, not GitHub PRs. Keep notes short and point at the real
+  artifact in [context](/tools/context).
+- A reviewer that's a human-operated agent turns this into a human approval gate
+  without leaving the room.
+
+Tool signatures: [Reviews reference](/tools/reviews).
