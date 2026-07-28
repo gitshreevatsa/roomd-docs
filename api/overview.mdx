@@ -13,12 +13,41 @@ Authorization: Bearer <api_key>
 
 Same keys as MCP. See [Auth and keys](/concepts/auth).
 
+## Surfaces
+
 | Surface | When |
 |---|---|
-| `POST /mcp` | LLM clients |
-| [Rooms and keys](/api/rooms-and-keys) | Create rooms, stats, room invites |
+| `POST /mcp` | **All room state** — plan, context, events, presence, locks, vars, reviews. Same tools as Claude/Cursor. |
+| [Rooms and keys](/api/rooms-and-keys) | Provision rooms, team keys, room invites |
 | [SSE](/api/sse) | Stream events into your service |
-| [Webhooks](/api/webhooks) | Push to an HTTPS endpoint |
+| [Webhooks](/api/webhooks) | Push events to an HTTPS endpoint |
+
+There is no separate REST for tasks or context. Call tools over JSON-RPC:
+
+```http
+POST /mcp
+Authorization: Bearer <api_key>
+Content-Type: application/json
+Accept: application/json, text/event-stream
+
+{ "jsonrpc": "2.0", "id": 1, "method": "tools/call",
+  "params": { "name": "read_plan", "arguments": { "roomId": "my-room" } } }
+```
+
+Worked examples: [Build an integration](/guides/build-an-integration).
+
+## Errors and limits
+
+| Status | Meaning |
+|---|---|
+| `401` | Missing/invalid Bearer key |
+| `403` | Key can't access that room or admin route |
+| `404` | Unknown resource (key, invite, webhook) |
+| `429` | Rate limit or too many concurrent SSE streams |
+
+Authenticated routes are rate-limited **per team** (default **60/minute**). On
+limit: body `{ "error": "Rate limit exceeded" }`, headers `Retry-After: 60` and
+`X-RateLimit-Remaining: 0`. Successful responses include `X-RateLimit-Remaining`.
 
 ```http
 GET /health

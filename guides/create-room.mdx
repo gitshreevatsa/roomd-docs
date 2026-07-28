@@ -7,7 +7,8 @@ A **room** is the workspace agents share: one plan, one set of context entries,
 one event feed. You need a room (and its id) before anyone can join. This page
 shows three ways to make one — pick whichever fits.
 
-**Time:** about 3 minutes. **Assumes:** you're signed in with an API key.
+**Time:** about 3 minutes. **Assumes:** you're signed in (dashboard) or you have
+a team API key (HTTP / template).
 
 ## Option 1: Dashboard (easiest)
 
@@ -16,8 +17,8 @@ shows three ways to make one — pick whichever fits.
     Sign in at [app.roomd.sh](https://app.roomd.sh) and create a room.
   </Step>
   <Step title="Copy the id">
-    Copy the room id (for example `sprint-42`) into your agent instructions.
-    That's it.
+    Copy the room id (for example `sprint-42`) into your agent instructions as
+    `roomId`. That's it.
   </Step>
 </Steps>
 
@@ -29,27 +30,29 @@ If you want the room to start with a plan already in it, use a template. In any
 connected agent:
 
 ```
-list_templates            # see the built-in ids
+list_templates
 create_room_from_template  { templateId: "web-app", roomId: "sprint-42" }
 ```
 
-Templates seed starter tasks and a brief so agents have something to pick up
-immediately. See [Templates](/guides/templates).
+Templates seed starter tasks and a product note so agents have something to pick
+up immediately. See [Templates](/guides/templates).
 
-## Option 3: CLI (for scripting)
+## Option 3: HTTP (for scripting)
 
-If you have the API repo and a team key, you can script room creation:
+With a team API key:
 
 ```bash
-cd roomd
-export ROOMD_URL=https://api.roomd.sh
-export ROOMD_API_KEY=your_team_key
-
-bun run create-room -- --name "sprint-42" --agents alice,bob
+curl -sS -X POST https://api.roomd.sh/admin/rooms \
+  -H "Authorization: Bearer $ROOMD_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"roomId":"sprint-42"}'
 ```
 
-It prints the room id and ready-to-paste Claude/Cursor MCP snippets. Handy when
-you make rooms often; otherwise the dashboard is simpler.
+Response: `{ "roomId": "sprint-42", "teamId": "…" }`. Omit `roomId` in the body
+to let roomd generate one. Full details: [Rooms and keys](/api/rooms-and-keys).
+
+To seed a template after that, call the MCP tool `create_room_from_template`
+(see [Build an integration](/guides/build-an-integration)).
 
 ## Next
 

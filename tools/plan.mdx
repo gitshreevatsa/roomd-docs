@@ -3,7 +3,7 @@ title: "Plan"
 description: "Tasks, dependencies, priority, and per-agent summaries."
 ---
 
-The plan is the board agents claim work from. Every tool takes `room_id`.
+The plan is the board agents claim work from. Every tool takes `roomId`.
 Arguments marked `?` are optional.
 
 | Tool | Arguments | Returns |
@@ -36,8 +36,10 @@ call: `{ myTasks, unreadEvents, newContextCount, presence, cursor }`.
 - `update_task` **auto-posts a `task_updated` event**, so other agents learn of
   the change without polling. Its `note` argument overwrites the task description.
 - `priority` is a plain integer: **lower = more important**.
-- `add_dependency` wires `depends_on` after both tasks exist; `add_task` can also
-  set `depends_on` up front.
+- `add_dependency` wires dependencies after both tasks exist; its argument is
+  camelCase `dependsOn`, while the stored `Task` field is snake_case
+  `depends_on`. `add_task` can also set `depends_on` up front.
+- Pass tool arguments as shown in the table (`roomId`, `taskId`, `agentId`).
 
 <Warning>
 `get_my_summary` **consumes** your unread events and advances your per-agent

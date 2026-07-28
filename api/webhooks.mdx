@@ -3,26 +3,92 @@ title: "Webhooks API"
 description: "Register HTTPS callbacks for room events."
 ---
 
+Team-scoped. Needs a Bearer **team** key (invite keys can't manage webhooks).
+
 ```http
 GET    /admin/webhooks
 POST   /admin/webhooks
 DELETE /admin/webhooks/:webhookId
 ```
 
-Create body:
+## Create
 
-```json
+```http
+POST /admin/webhooks
+Authorization: Bearer <team_key>
+Content-Type: application/json
+
 {
-  "url": "https://example.com/hooks/roomd"
+  "url": "https://example.com/hooks/roomd",
+  "roomId": "sprint-42",
+  "secret": "optional-min-8-chars"
 }
 ```
 
-On new events, roomd POSTs JSON with:
+| Field | Required | Notes |
+|---|---|---|
+| `url` | yes | HTTPS endpoint roomd will POST to |
+| `roomId` | no | If set, only that room's events fire this hook; omit for all rooms your team owns |
+| `secret` | no | HMAC key; if omitted or shorter than 8 chars, roomd generates one |
 
-```http
-X-Roomd-Signature: <hmac-sha256 hex of body>
+**201** response (secret shown once):
+
+```json
+{
+  "id": "a1b2c3d4e5f60718",
+  "url": "https://example.com/hooks/roomd",
+  "roomId": "sprint-42",
+  "secret": "…",
+  "createdAt": "2026-07-23T12:00:00.000Z",
+  "note": "Save the secret. It will not be shown again."
+}
 ```
 
-Check the signature with the webhook secret before acting.
+`GET /admin/webhooks` lists hooks with `secretHint` only (`****` + last four).
+
+## Delivery
+
+On each new room event, roomd POSTs JSON:
+
+```json
+{
+  "roomId": "sprint-42",
+  "event": {
+    "id": "…",
+    "type": "context_available",
+    "from": "backend-1",
+    "to": "frontend-1",
+    "payload": {},
+    "timestamp": "2026-07-23T12:00:01.000Z",
+    "read_by": []
+  }
+}
+```
+
+Headers:
+
+```http
+Content-Type: application/json
+X-Roomd-Signature: <hmac-sha256 hex of the raw body>
+```
+
+Verify before acting:
+
+```ts
+import { createHmac, timingSafeEqual } from "node:crypto";
+
+function verify(rawBody: string, signature: string, secret: string) {
+  const expected = createHmac("sha256", secret).update(rawBody).digest("hex");
+  const a = Buffer.from(expected, "utf8");
+  const b = Buffer.from(signature, "utf8");
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+```
+
+Delivery is fire-and-forget: ~10s timeout, no automatic retries. Failed POSTs
+are logged server-side; your endpoint should be idempotent on `event.id`.
+
+Webhooks do **not** advance MCP per-agent cursors. Agents still consume via
+`get_my_summary` / `wait_for_events`; hooks are a side channel for your services.
 
 UI: [Webhooks](/guides/webhooks-ui).

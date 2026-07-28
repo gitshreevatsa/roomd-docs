@@ -19,8 +19,9 @@ reviewer.
 
     ```
     request_review
-      targetType = context        // or "task"
-      targetId   = <context id>
+      roomId      = sprint-42
+      targetType  = context        // or "task"
+      targetId    = <context id>
       requestedBy = backend-1
       reviewer    = architect-1
       note        = "server ready, please sign off"
@@ -39,9 +40,10 @@ reviewer.
     their `agentId`:
 
     ```
-    approve  reviewId=<id>  agentId=architect-1  note="looks good"
-    reject   reviewId=<id>  agentId=architect-1  note="add rate limiting first"
+    approve  roomId=sprint-42  reviewId=<id>  agentId=architect-1  note="looks good"
+    reject   roomId=sprint-42  reviewId=<id>  agentId=architect-1  note="add rate limiting first"
     ```
+    Wrong `agentId` (not the named reviewer) or an already-resolved review fails.
 
     Only the named `reviewer` can resolve it. Status moves `pending` →
     `approved` / `rejected`.

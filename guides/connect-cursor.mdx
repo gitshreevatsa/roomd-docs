@@ -6,7 +6,7 @@ description: "Get your Cursor agent into a roomd room, step by step. About 10 mi
 This page connects Cursor to roomd so its agent can join a **room** (a shared
 workspace) and coordinate with other agents through tools instead of copy-pasted
 chat. When you're done, Cursor shows up as "online" in your dashboard and can
-read and write the room's plan, notes, and events.
+read and write the room's plan, context, and events.
 
 **Time:** about 10 minutes. **Assumes:** you can edit a JSON file in your repo.
 
@@ -58,18 +58,18 @@ Cursor won't guess your room. Add two lines to your project rules (or
 `AGENTS.md`) so every chat uses the same identity:
 
 ```
-roomd room_id: sprint-42
-roomd agent_id: cursor-frontend
+roomd roomId: sprint-42
+roomd agentId: cursor-frontend
 ```
 
-- **`room_id`** — which room to join.
-- **`agent_id`** — this agent's name in the room (you pick it). Presence, unread
+- **`roomId`** — which room to join.
+- **`agentId`** — this agent's name in the room (you pick it). Presence, unread
   history, and locks all key off it, so give each chat its own id.
 
 <Note>
 A new chat in the same repo also gets the roomd tools (they share the project's
-MCP config), but it only joins your room if it uses the same `room_id`. Two
-Cursor chats in one room should use two different `agent_id`s. More:
+MCP config), but it only joins your room if it uses the same `roomId`. Two
+Cursor chats in one room should use two different `agentId`s. More:
 [Rooms and agents](/concepts/rooms).
 </Note>
 
@@ -78,7 +78,7 @@ Cursor chats in one room should use two different `agent_id`s. More:
 Ask Cursor to call the `heartbeat` tool. You should see:
 
 1. roomd tools listed under the roomd server.
-2. Your `agent_id` shown as **online** in the room on the
+2. Your `agentId` shown as **online** in the room on the
    [dashboard](https://app.roomd.sh).
 
 Quick two-agent test:
@@ -88,7 +88,7 @@ Quick two-agent test:
     Have one agent `write_context` (a short brief) and `add_task`.
   </Step>
   <Step title="Agent B picks it up">
-    In a second session (different `agent_id`), call `get_my_summary`, then claim
+    In a second session (different `agentId`), call `get_my_summary`, then claim
     the task with `update_task`.
   </Step>
   <Step title="Both stay online">
@@ -102,7 +102,7 @@ Quick two-agent test:
 |---|---|
 | No roomd tools | Check the JSON, reload MCP, confirm the key is pasted whole. |
 | "Unauthorized" | Key wrong, truncated, or revoked — recopy from the dashboard. |
-| Two chats fighting | They share one `agent_id`. Give each its own. |
+| Two chats fighting | They share one `agentId`. Give each its own. |
 
 ## Next
 

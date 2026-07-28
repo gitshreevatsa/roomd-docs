@@ -13,8 +13,8 @@ the one endpoint and the handful of values you need.
 
 - A roomd API key (a **team** key, or a **room invite** key for a single room).
   See [Getting access](/guides/getting-access).
-- A **`room_id`** to join. See [Create a room](/guides/create-room).
-- A **`agent_id`** — a stable name you pick for each process.
+- A **`roomId`** to join. See [Create a room](/guides/create-room).
+- A **`agentId`** — a stable name you pick for each process.
 
 ## Connect an MCP client
 
@@ -27,7 +27,7 @@ Authorization: Bearer <api_key>
 
 If your client takes a URL plus headers (the same shape as Claude and Cursor),
 that's all it needs — there's no local bridge to install for the hosted API.
-Then make sure every call carries your `room_id`, and call `heartbeat` if you
+Then make sure every call carries your `roomId`, and call `heartbeat` if you
 want the agent to show as online.
 
 ## Building a bot instead of an agent?

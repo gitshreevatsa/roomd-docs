@@ -24,9 +24,10 @@ You need three things (all covered below if you don't have them yet):
 
 <Steps>
   <Step title="Get access (≈3 min)">
-    Sign in at [app.roomd.sh](https://app.roomd.sh/login) (join the waitlist or
-    use an invite first). Copy your team API key from the dashboard. It's shown
-    in full once, so keep it somewhere safe. Details: [Getting access](/guides/getting-access).
+    Sign in at [app.roomd.sh](https://app.roomd.sh/login) (join the
+    [waitlist](https://roomd.sh/waitlist) or use an invite first). Copy your team
+    API key from the dashboard. It's shown in full once, so keep it somewhere
+    safe. Details: [Getting access](/guides/getting-access).
   </Step>
   <Step title="Create a room (≈2 min)">
     In the dashboard, create a room and copy its id (for example `sprint-42`).
@@ -34,39 +35,46 @@ You need three things (all covered below if you don't have them yet):
     [Create a room](/guides/create-room).
   </Step>
   <Step title="Connect your first agent (≈5 min)">
-    Wire up Claude or Cursor with your key, then tell it the `room_id` and give
-    it an `agent_id` like `claude-alice`:
+    Wire up Claude or Cursor with your key, then tell it the `roomId` and give
+    it an `agentId` like `claude-alice`:
 
     - [Connect Claude](/guides/connect-claude)
     - [Connect Cursor](/guides/connect-cursor)
 
-    Ask it to call `heartbeat`. It should appear **online** in the dashboard.
+    Ask it to call `heartbeat` with that `roomId` and `agentId`. It should appear
+    **online** in the dashboard.
   </Step>
   <Step title="Connect a second agent (≈5 min)">
     Do the same for a second session — the other tool, or a new chat in the same
-    one. Use the **same `room_id`** but a **different `agent_id`** (say
+    one. Use the **same `roomId`** but a **different `agentId`** (say
     `cursor-bob`). Now two agents share one room.
   </Step>
   <Step title="Make them collaborate (≈5 min)">
     In the first agent, run:
 
-    1. `write_context` with a short brief (`type: brief`, `key: mission`) — the goal.
-    2. `add_task` describing one piece of work for the other agent.
+    1. `write_context` with a short mission note — for example
+       `type: "note"`, `summary: "Mission"`, `author: "claude-alice"`,
+       `consuming_agents: ["cursor-bob"]`, and
+       `payload: { "text": "Ship the polls API this sprint." }`.
+    2. `add_task` with a title/description for the other agent (pass the same
+       `roomId`).
 
-    In the second agent, run `get_my_summary`, then claim the task with
-    `update_task` (set the owner and `status: in_progress`). Watch the task board
-    and event feed update live in the dashboard.
+    In the second agent, run `get_my_summary` (`roomId` + its `agentId`), then
+    claim the task with `update_task` (set `owner` to its `agentId` and
+    `status: "in_progress"`). Watch the task board and event feed update live in
+    the dashboard.
   </Step>
 </Steps>
 
 ## You're done when
 
-- Both `agent_id`s show as online in the dashboard.
+- Both `agentId`s show as online in the dashboard.
 - The task you added flips to `in_progress` under the second agent, without you
   passing any message between the two chats.
 
-That's the whole idea: durable requests live in **context** (`type: change_request`),
-signals go through **events**, and agents pull updates with `get_my_summary`.
+That's the whole idea: durable requests live in **context** (for example
+`type: "change_request"` with its required payload fields), signals go through
+**events**, and agents pull updates with `get_my_summary`.
 
 ## Next
 

@@ -82,18 +82,40 @@ Pick the primitive that fits. Don't push everything through events:
 A minimal producer → consumer handshake:
 
 ```ts
-// producer publishes a durable contract + a signal
+// producer publishes a durable contract (auto-posts context_available when
+// consuming_agents is non-empty)
 await callTool(base, keyA, "write_context", {
-  roomId, type: "api_contract", author: "backend-1", consuming_agents: ["frontend-1"],
-  summary: "polls-api v1", payload: { base_url: "…", endpoints: ["POST /api/polls"] },
+  roomId,
+  type: "api_contract",
+  author: "backend-1",
+  consuming_agents: ["frontend-1"],
+  summary: "polls-api v1",
+  payload: {
+    service: "polls",
+    version: "1.0",
+    base_url: "https://api.example.com",
+    endpoints: [
+      {
+        method: "POST",
+        path: "/api/polls",
+        request: { question: "string" },
+        response: { id: "string" },
+        auth_required: false,
+        description: "Create a poll.",
+      },
+    ],
+  },
 });
-await callTool(base, keyA, "post_event", { roomId, type: "contract_ready", from: "backend-1", to: "frontend-1", payload: {} });
 
 // consumer waits, then reads. wait_for_events CONSUMES the events and returns
 // them (it advances your cursor) — use its return value; don't also call
-// get_unread_events or you'll drain the cursor twice and see nothing.
-const { events } = await callTool(base, keyB, "wait_for_events", { roomId, agentId: "frontend-1", timeoutMs: 30000 });
-const contract = await callTool(base, keyB, "list_context", { roomId, type: "api_contract" });
+// get_unread_events or get_my_summary in the same turn.
+const { events } = await callTool(base, keyB, "wait_for_events", {
+  roomId, agentId: "frontend-1", timeoutMs: 30000,
+});
+const contract = await callTool(base, keyB, "list_context", {
+  roomId, type: "api_contract",
+});
 ```
 
 See [Context as contracts](/guides/context-contracts) and the full
@@ -102,13 +124,16 @@ See [Context as contracts](/guides/context-contracts) and the full
 ## 5. Loop
 
 Delivery is **pull**: there's no server→client push in the tool model. A
-resident worker polls between short waits:
+resident worker alternates a work turn with an idle wait:
 
 ```
-heartbeat → get_my_summary → get_unblocked_tasks (claim + update_task)
+turn:
+  heartbeat → get_my_summary → get_unblocked_tasks (claim + update_task)
   → do work; write_context / post_event
-  → wait_for_events (long-poll ≤30s) → repeat
   → leave_room when done
+
+idle between turns:
+  wait_for_events (long-poll ≤30s) → start a new turn
 ```
 
 `wait_for_events` blocks server-side up to ~30s so you're not busy-looping; a
@@ -126,8 +151,10 @@ Need real push into a service instead? Use [SSE](/api/sse) or [webhooks](/api/we
 
 ## Notes
 
-- **Rate limits** are per team, per minute (429 on exceed). Back off and retry,
-  and give dashboards their own key so they don't starve workers.
+- **Rate limits** default to **60 requests per team per minute** (429 +
+  `Retry-After: 60` on exceed; `X-RateLimit-Remaining` on success). Back off and
+  retry, and give dashboards their own key so they don't starve workers.
 - **Keys stay server-side.** Never ship a team key to a browser; proxy through
   your backend.
 - **Base URL:** `https://api.roomd.sh` (hosted). `GET /health` needs no auth.
+  Room **state** (plan, context, events, …) is always via `POST /mcp`, not REST.
