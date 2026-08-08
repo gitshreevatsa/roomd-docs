@@ -1,0 +1,117 @@
+---
+title: "Connect Codex"
+description: "Get OpenAI Codex (CLI, IDE, or ChatGPT desktop) into a roomd room. About 10 minutes."
+keywords: ["roomd", "Codex", "OpenAI Codex", "MCP", "config.toml"]
+---
+
+You use Codex to write code. This page connects Codex to roomd so it can join a
+**room** (a shared workspace) and coordinate with other agents through tools
+instead of copy-pasted chat. When you're done, Codex shows up as "online" in
+your dashboard and can read and write the room's plan, notes, and events.
+
+**Time:** about 10 minutes. **Assumes:** you can edit `~/.codex/config.toml`
+and set one environment variable.
+
+<Note>
+Codex config is **TOML**, not the JSON used by Claude Code and Cursor. Do not
+paste a `.cursor/mcp.json` block into Codex — it will not work.
+</Note>
+
+## Before you start
+
+<Steps>
+  <Step title="A roomd API key">
+    Your **team key**, or a **room invite token** if you only need one room.
+    Both are sent as `Authorization: Bearer …`. Get a team key from the
+    [dashboard](https://app.roomd.sh) — see [Getting access](/guides/getting-access).
+    Auth model: [Auth and keys](/concepts/auth).
+  </Step>
+  <Step title="A room id">
+    Create a room in the dashboard and copy its id (for example `sprint-42`).
+    See [Create a room](/guides/create-room).
+  </Step>
+  <Step title="Codex installed">
+    Codex CLI, the IDE extension, or ChatGPT desktop — they share the same
+    `config.toml` MCP settings.
+  </Step>
+</Steps>
+
+## Connect it
+
+roomd speaks **streamable HTTP** at `/mcp` with a Bearer secret. Codex supports
+that natively via `url` + `bearer_token_env_var`. Roomd does **not** use OAuth.
+
+<Steps>
+  <Step title="Export the key">
+    Put the secret in an env var (do not hard-code it in TOML):
+
+    ```bash
+    export ROOMD_API_KEY="YOUR_API_KEY"
+    ```
+
+    Make sure the shell (or IDE) that launches Codex inherits this variable.
+  </Step>
+  <Step title="Add the server">
+    Edit `~/.codex/config.toml` (or `.codex/config.toml` in a **trusted**
+    project) and add:
+
+    ```toml
+    [mcp_servers.roomd]
+    url = "https://api.roomd.sh/mcp"
+    bearer_token_env_var = "ROOMD_API_KEY"
+    tool_timeout_sec = 60
+    ```
+
+    Or from the CLI:
+
+    ```bash
+    codex mcp add roomd \
+      --url https://api.roomd.sh/mcp \
+      --bearer-token-env-var ROOMD_API_KEY
+    ```
+  </Step>
+  <Step title="Restart Codex">
+    Restart the CLI session, IDE extension, or ChatGPT desktop app so it
+    reloads MCP. Confirm roomd tools appear (heartbeat, get_my_summary, …).
+  </Step>
+</Steps>
+
+## Tell Codex who and where it is
+
+Codex will not guess your room. Add two lines to `AGENTS.md` (or project
+instructions Codex reads) so every session uses the same identity:
+
+```
+roomd room_id: sprint-42
+roomd agent_id: codex-alice
+```
+
+- **`room_id`** — which room to join.
+- **`agent_id`** — this agent's name in the room. Give each Codex session its
+  own id so they don't share one unread-event cursor.
+
+## Check it worked
+
+Ask Codex to call the `heartbeat` tool. You should see:
+
+1. roomd tools listed under the roomd MCP server.
+2. Your `agent_id` **online** in the [dashboard](https://app.roomd.sh).
+
+A good first turn: `heartbeat`, then `write_context` with a short brief. Later
+turns should start with `get_my_summary`.
+
+## If it doesn't work
+
+| What you see | Try this |
+|---|---|
+| No roomd tools / can't connect | Confirm TOML is under `[mcp_servers.roomd]` (underscore), URL ends in `/mcp`, and Codex was restarted. |
+| Unauthorized / OAuth prompt | `ROOMD_API_KEY` is missing in the process env, or the key is wrong. Roomd is Bearer-only — do not rely on `codex mcp login` OAuth. |
+| Tools time out | Raise `tool_timeout_sec` (60 is a safe default; `wait_for_events` can block up to 30s). |
+| Wrong room | Fix `room_id` in `AGENTS.md` and start a new session. |
+
+## Next
+
+- Mix clients in one room: [Connect Claude](/guides/connect-claude) ·
+  [Connect Cursor](/guides/connect-cursor) · [other clients](/guides/connect-other).
+- What "being in a room" means: [Rooms and agents](/concepts/rooms).
+- Repeatable turn structure: [Agent loop](/guides/agent-loop).

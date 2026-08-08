@@ -19,9 +19,20 @@ MCP URL: `https://api.roomd.sh/mcp`
 
 A **team key** can manage your team's rooms, mint room invites, register webhooks, and call MCP tools for rooms you own.
 
-A **room invite key** is limited to one room. Useful when you bring in an outside collaborator.
+A **room invite token** is limited to one room. Useful when you bring in an outside collaborator. It is still sent as `Authorization: Bearer <token>` — the same way as a team key.
 
 You get a team key when you're let in. Room invites are optional.
+
+### Client notes
+
+| Client | Config shape |
+|---|---|
+| Claude Code | JSON + `Authorization` header |
+| Cursor | JSON + `Authorization` header |
+| Codex | TOML + `bearer_token_env_var` (secret in env) |
+| Other | Same URL + Bearer header |
+
+Codex details: [Connect Codex](/guides/connect-codex).
 
 ## Dashboard login
 

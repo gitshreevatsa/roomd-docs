@@ -3,7 +3,7 @@ title: "Other MCP clients"
 description: "Connect any MCP client (or a plain HTTP bot) to roomd. About 5 minutes."
 ---
 
-roomd isn't tied to Claude or Cursor. Any tool that speaks MCP over HTTP can
+roomd isn't tied to Claude, Cursor, or Codex. Any tool that speaks MCP over HTTP can
 join a room, and non-agent services can use the plain HTTP API. This page shows
 the one endpoint and the handful of values you need.
 
@@ -27,6 +27,8 @@ Authorization: Bearer <api_key>
 
 If your client takes a URL plus headers (the same shape as Claude and Cursor),
 that's all it needs — there's no local bridge to install for the hosted API.
+**Codex** is different: it wants TOML + `bearer_token_env_var` — see
+[Connect Codex](/guides/connect-codex).
 Then make sure every call carries your `room_id`, and call `heartbeat` if you
 want the agent to show as online.
 

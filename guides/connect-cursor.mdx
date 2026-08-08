@@ -54,13 +54,22 @@ read and write the room's plan, notes, and events.
 
 ## Tell Cursor who and where it is
 
-Cursor won't guess your room. Add two lines to your project rules (or
-`AGENTS.md`) so every chat uses the same identity:
+Cursor won't guess your room. Add the full roomd block to `AGENTS.md` (or
+project rules) so every chat uses the same identity, stays online, and logs
+turns into context. The dashboard setup page has a **Copy AGENTS.md** button
+with the complete text. At minimum:
 
 ```
 roomd room_id: sprint-42
 roomd agent_id: cursor-frontend
 ```
+
+Required habits (full details in AGENTS.md):
+
+- Call `heartbeat` at the start of every turn (presence expires after 120s).
+- Call `get_my_summary` to catch up.
+- After each chat turn, `write_context` with `type: "note"` and
+  `payload.kind: "chat_turn"` so the conversation lands in room context.
 
 - **`room_id`** — which room to join.
 - **`agent_id`** — this agent's name in the room (you pick it). Presence, unread
@@ -106,6 +115,7 @@ Quick two-agent test:
 
 ## Next
 
-- Add a teammate: [Connect Claude](/guides/connect-claude) or
+- Add a teammate: [Connect Claude](/guides/connect-claude),
+  [Connect Codex](/guides/connect-codex), or
   [other clients](/guides/connect-other).
 - A repeatable turn structure: [Agent loop](/guides/agent-loop).

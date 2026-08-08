@@ -70,6 +70,7 @@
             "pages": [
               "guides/connect-claude",
               "guides/connect-cursor",
+              "guides/connect-codex",
               "guides/connect-other"
             ]
           },
